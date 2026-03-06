@@ -231,6 +231,8 @@ export function exportAsMd(profile: ProfileData, selection?: ExportSelection): s
 
 // ─── HTML preview (mirrors compiled .tex output) ─────────────────────────────
 
+export type ResumeHtmlOpts = { editable?: boolean }
+
 const RESUME_CSS = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
   @page { size: letter; margin: 0.5in; }
@@ -310,27 +312,38 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-export function generateResumeHtml(profile: ProfileData, selection?: ExportSelection): string {
+export function generateResumeHtml(
+  profile: ProfileData,
+  selection?: ExportSelection,
+  opts?: ResumeHtmlOpts,
+): string {
+  const editable = opts?.editable ?? false
   const c = profile.contact
 
-  const eduEntries  = profile.education.filter(e  => !selection || selection.education.includes(e.id))
-  const expEntries  = profile.experience.filter(e => !selection || selection.experience.includes(e.id))
-  const projEntries = profile.projects.filter(e   => !selection || selection.projects.includes(e.id))
-  const skillEntries = profile.skills.filter(e    => !selection || selection.skills.includes(e.id))
+  // Produces data-attribute string + contenteditable when editable
+  const at = (rf: string, rs: string, rid?: string, rbi?: number) =>
+    editable
+      ? ` data-rf="${rf}" data-rs="${rs}"${rid ? ` data-rid="${rid}"` : ''}${rbi != null ? ` data-rbi="${rbi}"` : ''} contenteditable="true" spellcheck="false"`
+      : ''
+
+  const eduEntries   = profile.education.filter(e  => !selection || selection.education.includes(e.id))
+  const expEntries   = profile.experience.filter(e => !selection || selection.experience.includes(e.id))
+  const projEntries  = profile.projects.filter(e   => !selection || selection.projects.includes(e.id))
+  const skillEntries = profile.skills.filter(e     => !selection || selection.skills.includes(e.id))
 
   const contactParts: string[] = []
-  if (c.phone)    contactParts.push(esc(c.phone))
-  if (c.email)    contactParts.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`)
-  if (c.linkedin) contactParts.push(`<a href="https://linkedin.com/in/${esc(c.linkedin)}">linkedin.com/in/${esc(c.linkedin)}</a>`)
-  if (c.github)   contactParts.push(`<a href="https://github.com/${esc(c.github)}">github.com/${esc(c.github)}</a>`)
-  if (c.portfolio) contactParts.push(`<a href="${esc(c.portfolio)}">${esc(c.portfolio)}</a>`)
+  if (c.phone)     contactParts.push(`<span${at('phone', 'contact')}>${esc(c.phone)}</span>`)
+  if (c.email)     contactParts.push(`<a href="mailto:${esc(c.email)}"${at('email', 'contact')}>${esc(c.email)}</a>`)
+  if (c.linkedin)  contactParts.push(`<a href="https://linkedin.com/in/${esc(c.linkedin)}"${at('linkedin', 'contact')}>linkedin.com/in/${esc(c.linkedin)}</a>`)
+  if (c.github)    contactParts.push(`<a href="https://github.com/${esc(c.github)}"${at('github', 'contact')}>github.com/${esc(c.github)}</a>`)
+  if (c.portfolio) contactParts.push(`<a href="${esc(c.portfolio)}"${at('portfolio', 'contact')}>${esc(c.portfolio)}</a>`)
 
   const sec = (title: string, body: string) =>
     `<section><div class="sec-title">${title}</div>${body}</section>`
 
-  const bullets = (bs: string[], raw: string) => {
+  const blist = (bs: string[], raw: string, section: string, id: string) => {
     if (bs.length > 0)
-      return `<ul class="bullets">${bs.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`
+      return `<ul class="bullets">${bs.map((b, i) => `<li${at('bullet', section, id, i)}>${esc(b)}</li>`).join('')}</ul>`
     if (raw)
       return `<div class="rawtext">${esc(raw)}</div>`
     return ''
@@ -338,33 +351,55 @@ export function generateResumeHtml(profile: ProfileData, selection?: ExportSelec
 
   const eduHtml = eduEntries.length === 0 ? '' : sec('Education', eduEntries.map(e => `
     <div class="entry">
-      <div class="row"><span class="org">${esc(e.school)}</span><span class="date">${esc(e.location)}</span></div>
-      <div class="row sub"><span>${esc(e.degree)}</span><span>${esc(e.dates)}</span></div>
-      ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> ${esc(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</div>` : ''}
+      <div class="row"><span class="org"${at('school', 'education', e.id)}>${esc(e.school)}</span><span class="date"${at('location', 'education', e.id)}>${esc(e.location)}</span></div>
+      <div class="row sub"><span${at('degree', 'education', e.id)}>${esc(e.degree)}</span><span${at('dates', 'education', e.id)}>${esc(e.dates)}</span></div>
+      ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> <span${at('coursework', 'education', e.id)}>${esc(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</span></div>` : ''}
     </div>`).join(''))
 
   const expHtml = expEntries.length === 0 ? '' : sec('Experience', expEntries.map(e => `
     <div class="entry">
-      <div class="row"><span class="org">${esc(e.company)}</span><span class="date">${esc(e.dates)}</span></div>
-      <div class="row sub"><span>${esc(e.role)}</span><span>${esc(e.location)}</span></div>
-      ${bullets(e.bullets, e.rawText)}
+      <div class="row"><span class="org"${at('company', 'experience', e.id)}>${esc(e.company)}</span><span class="date"${at('dates', 'experience', e.id)}>${esc(e.dates)}</span></div>
+      <div class="row sub"><span${at('role', 'experience', e.id)}>${esc(e.role)}</span><span${at('location', 'experience', e.id)}>${esc(e.location)}</span></div>
+      ${blist(e.bullets, e.rawText, 'experience', e.id)}
     </div>`).join(''))
 
   const projHtml = projEntries.length === 0 ? '' : sec('Projects', projEntries.map(e => `
     <div class="entry">
       <div class="row">
         <span class="org" style="font-size:9.5pt">
-          ${esc(e.name)}${e.techStack ? ` <span style="font-weight:400;font-style:italic">| ${esc(e.techStack)}</span>` : ''}
+          <span${at('name', 'projects', e.id)}>${esc(e.name)}</span>${e.techStack ? ` <span style="font-weight:400;font-style:italic"${at('techStack', 'projects', e.id)}>| ${esc(e.techStack)}</span>` : ''}
         </span>
-        <span class="date">${esc(e.dates)}</span>
+        <span class="date"${at('dates', 'projects', e.id)}>${esc(e.dates)}</span>
       </div>
-      ${bullets(e.bullets, e.rawText)}
+      ${blist(e.bullets, e.rawText, 'projects', e.id)}
     </div>`).join(''))
 
   const skillHtml = skillEntries.length === 0 ? '' : sec('Technical Skills',
     skillEntries.map(e =>
-      `<div class="sk-row"><span class="sk-cat">${esc(e.category)}:</span> ${esc(e.technologies)}</div>`
+      `<div class="sk-row"><span class="sk-cat"${at('category', 'skills', e.id)}>${esc(e.category)}:</span> <span${at('technologies', 'skills', e.id)}>${esc(e.technologies)}</span></div>`
     ).join(''))
+
+  const editCss = editable ? `
+  [data-rf] { cursor: text; border-radius: 2px; outline: none; }
+  [data-rf]:hover:not(:focus) { outline: 1px dashed rgba(70,102,119,0.45); }
+  [data-rf]:focus { outline: 1.5px solid rgba(70,102,119,0.75); background: rgba(70,102,119,0.05); outline-offset: 1px; }
+  * { caret-color: #456677; }` : ''
+
+  // Injected script: syncs field value on focusout; notifies parent of focus state
+  const editScript = editable ? `<script>(function(){
+  document.addEventListener('focusin',function(e){
+    if(e.target.closest('[data-rf]')) window.parent.postMessage({type:'resume-focus'},'*');
+  });
+  document.addEventListener('focusout',function(e){
+    var el=e.target.closest('[data-rf]');
+    if(!el)return;
+    window.parent.postMessage({type:'resume-input',rf:el.dataset.rf,rs:el.dataset.rs,rid:el.dataset.rid||null,rbi:el.dataset.rbi!=null?+el.dataset.rbi:null,value:el.innerText.trim()},'*');
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){var el=e.target.closest('[data-rf]');if(el){e.preventDefault();el.blur();}}
+    if(e.key==='Escape'){var el=e.target.closest('[data-rf]');if(el)el.blur();}
+  });
+})();</script>` : ''
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -372,14 +407,15 @@ export function generateResumeHtml(profile: ProfileData, selection?: ExportSelec
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <style>${RESUME_CSS}</style>
+  <style>${RESUME_CSS}${editCss}</style>
 </head>
 <body>
   <div class="hdr">
-    <h1>${esc(c.name || 'Your Name')}</h1>
+    <h1${at('name', 'contact')}>${esc(c.name || 'Your Name')}</h1>
     <div class="contact">${contactParts.join('<span class="sep">|</span>')}</div>
   </div>
   ${eduHtml}${expHtml}${projHtml}${skillHtml}
+  ${editScript}
 </body>
 </html>`
 }

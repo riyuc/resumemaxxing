@@ -3,6 +3,7 @@ import {
   Plus, X, Trash2, Pencil, Check, GraduationCap, Briefcase,
   Code2, Wrench, User, ChevronDown, ChevronRight, ChevronLeft, Upload, TerminalSquare,
   Download, FileText, Printer, ChevronUp, PanelLeftOpen,
+  SquarePen,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { parseTexResume } from '@/utils/texParser'
@@ -48,6 +49,29 @@ type DraftEntry =
   | { sectionType: 'experience'; id: string | null; data: Omit<ExperienceEntry, 'id'> }
   | { sectionType: 'projects';   id: string | null; data: Omit<ProjectEntry,    'id'> }
   | { sectionType: 'skills';     id: string | null; data: Omit<SkillsEntry,     'id'> }
+
+// ─── edit-on-preview helpers ──────────────────────────────────────────────────
+
+function applyFieldEdit(
+  profile: ProfileData,
+  rs: string, rid: string | null, rf: string, rbi: number | null,
+  value: string,
+): ProfileData {
+  if (rs === 'contact') return { ...profile, contact: { ...profile.contact, [rf]: value } }
+  const key = rs as 'education' | 'experience' | 'projects' | 'skills'
+  return {
+    ...profile,
+    [key]: (profile[key] as { id: string }[]).map(e => {
+      if (e.id !== rid) return e
+      if (rf === 'bullet' && rbi != null) {
+        const bullets = [...(e as unknown as { bullets: string[] }).bullets]
+        bullets[rbi] = value
+        return { ...e, bullets }
+      }
+      return { ...e, [rf]: value }
+    }),
+  }
+}
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -422,15 +446,22 @@ export default function CreatePage() {
   const [importStatus, setImportStatus]     = useState<'idle' | 'success' | 'error'>('idle')
   const [pdfImporting, setPdfImporting]     = useState(false)
   const [sidebarOpen, setSidebarOpen]       = useState(true)
+  const [editMode, setEditMode]             = useState(false)
+  const [iframeEditing, setIframeEditing]   = useState(false)
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false)
+  const [pdfPreviewHtml, setPdfPreviewHtml] = useState('')
+  const [contentHeight, setContentHeight]   = useState(0)
+  const [pdfPageCount, setPdfPageCount]     = useState(1)
 
   // live preview draft — tracks what's currently being typed in open forms
   const [draftEntry, setDraftEntry]         = useState<DraftEntry | null>(null)
 
-  const texRef = useRef<HTMLInputElement>(null)
-  const pdfRef = useRef<HTMLInputElement>(null)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const texRef            = useRef<HTMLInputElement>(null)
+  const pdfRef            = useRef<HTMLInputElement>(null)
+  const iframeRef         = useRef<HTMLIFrameElement>(null)
+  const pdfPreviewIfrRef  = useRef<HTMLIFrameElement>(null)
 
-  const { width: leftWidth, onMouseDown: onDividerMouseDown } = useResize(460)
+  const { width: leftWidth, onMouseDown: onDividerMouseDown } = useResize(500)
 
   // ── derive live preview profile ──
   const previewProfile = useMemo<ProfileData>(() => {
@@ -475,9 +506,13 @@ export default function CreatePage() {
 
   const [resumeHtmlFinal, setResumeHtmlFinal] = useState(resumeHtml)
   useEffect(() => {
-    const t = setTimeout(() => setResumeHtmlFinal(generateResumeHtml(livePreviewProfile)), 120)
+    // Don't re-render the iframe while the user is actively typing in it
+    if (iframeEditing) return
+    const t = setTimeout(() => {
+      setResumeHtmlFinal(generateResumeHtml(livePreviewProfile, undefined, { editable: editMode }))
+    }, 120)
     return () => clearTimeout(t)
-  }, [livePreviewProfile])
+  }, [livePreviewProfile, editMode, iframeEditing])
 
   // ── sections ──
   const addSection = (type: SectionType) => {
@@ -591,24 +626,55 @@ export default function CreatePage() {
     } finally { setPdfImporting(false); e.target.value = '' }
   }
 
+  const openPdfPreview = () => {
+    setPdfPreviewHtml(generateResumeHtml(livePreviewProfile))
+    setPdfPageCount(1)
+    setPdfPreviewOpen(true)
+  }
+
+  const handlePdfPreviewLoad = useCallback(() => {
+    const h = pdfPreviewIfrRef.current?.contentDocument?.body?.scrollHeight
+    if (h && pdfPreviewIfrRef.current) {
+      pdfPreviewIfrRef.current.style.height = `${h}px`
+      setPdfPageCount(Math.max(1, Math.ceil(h / 1056)))
+    }
+  }, [])
+
   // ── exports ──
   const nameSlug = profile.contact.name?.replace(/\s+/g, '_') || 'resume'
   const handleExportTex = () => downloadFile(exportAsTex(profile), `${nameSlug}_resume.tex`, 'text/plain')
   const handleExportMd  = () => downloadFile(exportAsMd(profile),  `${nameSlug}_resume.md`,  'text/markdown')
-  const handlePrint     = () => printResumePdf(resumeHtmlFinal)
+  // Always print the clean (non-editable) version
+  const handlePrint = () => printResumePdf(generateResumeHtml(livePreviewProfile))
 
-  // iframe auto-height
+  // iframe auto-height + page count tracking
   useEffect(() => {
     const iframe = iframeRef.current; if (!iframe) return
     const resize = () => {
       const h = iframe.contentDocument?.body?.scrollHeight
-      if (h) iframe.style.height = `${h + 32}px`
+      if (h) { iframe.style.height = `${h + 32}px`; setContentHeight(h) }
     }
     iframe.addEventListener('load', resize)
     return () => iframe.removeEventListener('load', resize)
   }, [resumeHtmlFinal])
 
+  // postMessage listener for contenteditable edit-on-preview
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (!editMode) return
+      if (e.data?.type === 'resume-focus') { setIframeEditing(true); return }
+      if (e.data?.type !== 'resume-input') return
+      setIframeEditing(false)
+      const { rf, rs, rid, rbi, value } = e.data
+      setProfile(p => applyFieldEdit(p, rs, rid ?? null, rf, rbi ?? null, value))
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [editMode])
+
   const eId = (type: SectionType) => editingEntry?.type === type ? editingEntry.id : null
+
+  const pageCount = contentHeight > 0 ? Math.max(1, Math.ceil(contentHeight / 1056)) : 1
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -617,8 +683,8 @@ export default function CreatePage() {
 
       {/* ══ LEFT PANEL (sidebar) ══ */}
       <div
-        className="shrink-0 border-r border-[#0d1a2e] bg-[#030b18] overflow-hidden transition-[width] duration-200"
-        style={{ width: sidebarOpen ? leftWidth : 44 }}
+        className="shrink-0 border-r border-[#0d1a2e] bg-[#030b18] overflow-hidden transition-[width] duration-0"
+        style={{ width: sidebarOpen ? leftWidth : 46 }}
       >
         {sidebarOpen ? (
         <div className="overflow-y-auto h-full">
@@ -999,13 +1065,21 @@ export default function CreatePage() {
             <span className="text-payne-gray">~/</span>
             <span className="text-[#c8d8f0]">preview</span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse ml-1" title="live" />
+            <span className={cn('text-[11px] font-jetbrains ml-1', pageCount > 1 ? 'text-[#ef4444]' : 'text-[#4a7090]')}>
+              {pageCount > 1 ? `⚠ ${pageCount} pages` : '1 page'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <DropdownBtn label="export" icon={<Download size={11} />} align="right">
               <DropItem onClick={handleExportTex}><FileText size={12} className="text-payne-gray" /> download .tex</DropItem>
               <DropItem onClick={handleExportMd}><FileText size={12} className="text-payne-gray" /> download .md</DropItem>
             </DropdownBtn>
-            <PillBtn variant="accent" onClick={handlePrint}><Printer size={11} /> print PDF</PillBtn>
+            <PillBtn variant={editMode ? 'accent' : 'default'} onClick={() => { setEditMode(m => !m); setIframeEditing(false) }}>
+              <SquarePen size={11} /> {editMode ? 'editing' : 'edit'}
+            </PillBtn>
+            <PillBtn variant="default" onClick={openPdfPreview}>
+              <Printer size={11} /> PDF preview
+            </PillBtn>
           </div>
         </div>
 
@@ -1015,14 +1089,56 @@ export default function CreatePage() {
               ref={iframeRef}
               srcDoc={resumeHtmlFinal}
               title="Resume Preview"
-              sandbox="allow-same-origin"
-              className="w-full border-0 bg-white"
+              sandbox={editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
+              className={cn('w-full border-0 bg-white', editMode && 'cursor-pointer')}
               style={{ minHeight: '1056px' }}
             />
           </div>
         </div>
-
       </div>
+
+      {/* ══ PDF PREVIEW MODAL ══ */}
+      {pdfPreviewOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col items-center overflow-y-auto py-8 px-4">
+          {/* toolbar */}
+          <div className="sticky top-0 z-10 w-full max-w-[880px] flex items-center justify-between px-4 py-2.5 bg-[#030b18] border border-[#1a3050] rounded-xl mb-5 shadow-xl">
+            <div className="flex items-center gap-3 text-xs">
+              <Printer size={13} className="text-[#456677]" />
+              <span className="text-[#c8d8f0]">PDF Preview</span>
+              <span className={cn('font-jetbrains', pdfPageCount > 1 ? 'text-[#ef4444]' : 'text-[#4ade80]')}>
+                {pdfPageCount > 1 ? `⚠ ${pdfPageCount} pages` : '✓ 1 page'}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <PillBtn variant="accent" onClick={handlePrint}><Printer size={11} /> print / save PDF</PillBtn>
+              <PillBtn variant="ghost" onClick={() => setPdfPreviewOpen(false)}><X size={11} /> close</PillBtn>
+            </div>
+          </div>
+          {/* page view */}
+          <div className="w-full max-w-[880px] relative shadow-2xl">
+            <iframe
+              ref={pdfPreviewIfrRef}
+              srcDoc={pdfPreviewHtml}
+              title="PDF Preview"
+              sandbox="allow-same-origin"
+              className="w-full border-0 bg-white"
+              style={{ minHeight: '1056px' }}
+              onLoad={handlePdfPreviewLoad}
+            />
+            {/* page-break overlays */}
+            <div className="absolute inset-0 pointer-events-none">
+              {Array.from({ length: pdfPageCount - 1 }, (_, i) => (
+                <div key={i} style={{ position: 'absolute', top: (i + 1) * 1056, left: 0, right: 0 }}
+                  className="border-t-2 border-dashed border-red-500/50">
+                  <span className="absolute right-2 -top-5 bg-[#1a0808] text-[#ef4444] text-[10px] px-2 py-0.5 rounded font-jetbrains">
+                    page {i + 2}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
