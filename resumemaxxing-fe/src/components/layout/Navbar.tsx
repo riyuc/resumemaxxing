@@ -13,7 +13,7 @@ const NAV_ITEMS = [
 const Navbar = () => {
   return (
     <nav className="w-full sticky top-0 z-50 border-b border-[#0d1a2e] bg-[#030b18]/90 backdrop-blur-sm">
-      <div className="max-w-[1280px] mx-auto px-6 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
 
         {/* Logo + wordmark */}
         <Link to="/" className="flex items-center gap-2.5 group">

@@ -4,7 +4,7 @@ const HomePage = () => {
   return (
     <div className="flex flex-col gap-12 mt-6">
         {/* Home Page */}
-        <main className="max-w-[1280px] mx-auto px-8 flex-1 w-full">
+        <main className="max-w-7xl mx-auto px-8 flex-1 w-full">
           <HeroSection />
         </main>
         {/* Showcase */}

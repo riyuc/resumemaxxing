@@ -74,13 +74,13 @@ const HeroSection = () => {
       <motion.div {...fade(0.55)} className="flex items-center gap-3 flex-wrap">
         <Link
           to="/profile"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#456677] text-sm text-[#c8d8f0] hover:bg-[#0d1928] hover:border-[#6a8aaa] transition-all font-jetbrains"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-payne-gray text-sm text-[#c8d8f0] hover:bg-[#0d1928] hover:border-[#6a8aaa] transition-all font-jetbrains"
         >
-          <span className="text-[#456677]">›</span> set up profile
+          <span className="text-payne-gray">›</span> set up profile
         </Link>
         <Link
           to="/create"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#456677] text-sm text-white hover:bg-[#5a7d91] transition-all font-jetbrains"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-payne-gray text-sm text-white hover:bg-[#5a7d91] transition-all font-jetbrains"
         >
           <span>›</span> build my resume
         </Link>

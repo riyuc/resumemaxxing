@@ -65,7 +65,7 @@ const Field = ({
   placeholder?: string; mono?: boolean; multiline?: boolean;
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-[10px] text-[#456677] tracking-widest uppercase">{label}</span>
+    <span className="text-[10px] text-payne-gray tracking-widest uppercase">{label}</span>
     {multiline ? (
       <textarea
         value={value}
@@ -73,8 +73,8 @@ const Field = ({
         placeholder={placeholder}
         rows={4}
         className={cn(
-          'bg-[#060e20] border border-[#1e3a5f] rounded p-3 text-[12px] text-[#f8fbf8]',
-          'placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-none',
+          'bg-[#060e20] border border-[#1e3a5f] rounded p-3 text-[12px] text-porcelain',
+          'placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none',
           'leading-relaxed',
           mono && 'font-jetbrains',
         )}
@@ -85,8 +85,8 @@ const Field = ({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          'bg-[#060e20] border border-[#1e3a5f] rounded p-3 text-[12px] text-[#f8fbf8]',
-          'placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677]',
+          'bg-[#060e20] border border-[#1e3a5f] rounded p-3 text-[12px] text-porcelain',
+          'placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray',
           mono && 'font-jetbrains',
         )}
       />
@@ -107,9 +107,9 @@ const PillBtn = ({
     className={cn(
       'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-jetbrains',
       'transition-all duration-150 cursor-pointer select-none',
-      variant === 'default' && 'border border-[#456677] text-[#94a3b8] hover:border-[#6a8fa3] hover:text-[#f8fbf8]',
-      variant === 'accent'  && 'bg-[#456677] text-white hover:bg-[#5a7d91]',
-      variant === 'ghost'   && 'text-[#456677] hover:text-[#f8fbf8]',
+      variant === 'default' && 'border border-payne-gray text-[#94a3b8] hover:border-[#6a8fa3] hover:text-porcelain',
+      variant === 'accent'  && 'bg-payne-gray text-white hover:bg-[#5a7d91]',
+      variant === 'ghost'   && 'text-payne-gray hover:text-porcelain',
       variant === 'danger'  && 'text-[#ef4444]/60 hover:text-[#ef4444]',
       className,
     )}
@@ -122,12 +122,12 @@ const PillBtn = ({
 
 const EditableBullets = ({ bullets, onChange }: { bullets: string[]; onChange: (bs: string[]) => void }) => (
   <div className="flex flex-col gap-1.5">
-    <span className="text-[10px] text-[#456677] tracking-widest uppercase">bullets</span>
+    <span className="text-[10px] text-payne-gray tracking-widest uppercase">bullets</span>
     <textarea
       value={bullets.join('\n')}
       onChange={e => onChange(e.target.value.split('\n'))}
       rows={Math.max(4, bullets.length + 1)}
-      className="w-full bg-[#060e20] border border-[#1e3a5f] rounded px-3 py-2 text-xs text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-y font-jetbrains leading-relaxed"
+      className="w-full bg-[#060e20] border border-[#1e3a5f] rounded px-3 py-2 text-xs text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-y font-jetbrains leading-relaxed"
       placeholder={"each line is one bullet\n—\npress Enter to add a new bullet"}
     />
   </div>
@@ -157,7 +157,7 @@ const EducationForm = ({
       </div>
       <Field label="relevant coursework" value={coursework} onChange={setCw} placeholder="Operating Systems, Algorithms, AI..." />
       <div className="flex flex-col gap-1">
-        <span className="text-[10px] text-[#456677] tracking-widest uppercase">
+        <span className="text-[10px] text-payne-gray tracking-widest uppercase">
           // tell us about your time here — be casual
         </span>
         <span className="text-[10px] text-[#4a7090] mb-1">
@@ -168,7 +168,7 @@ const EducationForm = ({
           onChange={e => setRawText(e.target.value)}
           placeholder={SECTION_META.education.placeholder}
           rows={4}
-          className="bg-[#060e20] border border-[#456677]/30 rounded px-3 py-2 text-sm text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-none font-jetbrains leading-relaxed"
+          className="bg-[#060e20] border border-payne-gray/30 rounded px-3 py-2 text-sm text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
         />
       </div>
       <div className="flex gap-2 pt-1">
@@ -203,7 +203,7 @@ const ExperienceForm = ({
       </div>
       <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1">
-        <span className="text-[10px] text-[#456677] tracking-widest uppercase">
+        <span className="text-[10px] text-payne-gray tracking-widest uppercase">
           // what did you do there? — be casual
         </span>
         <span className="text-[10px] text-[#4a7090] mb-1">
@@ -214,7 +214,7 @@ const ExperienceForm = ({
           onChange={e => setRawText(e.target.value)}
           placeholder={SECTION_META.experience.placeholder}
           rows={5}
-          className="bg-[#060e20] border border-[#456677]/30 rounded px-3 py-2 text-sm text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-none font-jetbrains leading-relaxed"
+          className="bg-[#060e20] border border-payne-gray/30 rounded px-3 py-2 text-sm text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
         />
       </div>
       <div className="flex gap-2 pt-1">
@@ -247,7 +247,7 @@ const ProjectForm = ({
       <Field label="tech stack" value={techStack} onChange={setTech} placeholder="Python, FastAPI, React, OpenAI API..." />
       <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1">
-        <span className="text-[10px] text-[#456677] tracking-widest uppercase">
+        <span className="text-[10px] text-payne-gray tracking-widest uppercase">
           // describe the project — be casual
         </span>
         <span className="text-[10px] text-[#4a7090] mb-1">
@@ -258,7 +258,7 @@ const ProjectForm = ({
           onChange={e => setRawText(e.target.value)}
           placeholder={SECTION_META.projects.placeholder}
           rows={5}
-          className="bg-[#060e20] border border-[#456677]/30 rounded px-3 py-2 text-sm text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-none font-jetbrains leading-relaxed"
+          className="bg-[#060e20] border border-payne-gray/30 rounded px-3 py-2 text-sm text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
         />
       </div>
       <div className="flex gap-2 pt-1">
@@ -534,10 +534,10 @@ export default function ProfilePage() {
         {/* ── page header ── */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2 text-[#4a7090] text-xs">
-            <TerminalSquare size={14} className="text-[#456677]" />
-            <span className="text-[#456677]">~/</span>
-            <span className="text-[#f8fbf8]">profile</span>
-            <span className="text-[#456677]">.tsx</span>
+            <TerminalSquare size={14} className="text-payne-gray" />
+            <span className="text-payne-gray">~/</span>
+            <span className="text-porcelain">profile</span>
+            <span className="text-payne-gray">.tsx</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -571,7 +571,7 @@ export default function ProfilePage() {
             </PillBtn>
             <Link
               to="/create"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-jetbrains bg-[#456677] text-white hover:bg-[#5a7d91] transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-jetbrains bg-payne-gray text-white hover:bg-[#5a7d91] transition-all"
             >
               create resume ↗
             </Link>
@@ -583,8 +583,8 @@ export default function ProfilePage() {
         {/* ── contact section ── */}
         <div className="mb-8 border border-[#1a3050] rounded-xl p-5 bg-[#08132a]">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 text-[#f8fbf8] text-xs tracking-widest">
-              <User size={13} className="text-[#456677]" />
+            <div className="flex items-center gap-2 text-porcelain text-xs tracking-widest">
+              <User size={13} className="text-payne-gray" />
               <span className="uppercase">Contact</span>
             </div>
             {!editingContact ? (
@@ -619,7 +619,7 @@ export default function ProfilePage() {
               <motion.div key="display" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {profile.contact.name ? (
                   <div className="flex flex-col gap-2">
-                    <p className="text-xl font-bold tracking-tight text-[#f8fbf8]">{profile.contact.name}</p>
+                    <p className="text-xl font-bold tracking-tight text-porcelain">{profile.contact.name}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94a3b8]">
                       {profile.contact.phone    && <span>{profile.contact.phone}</span>}
                       {profile.contact.email    && <span>{profile.contact.email}</span>}
@@ -654,9 +654,9 @@ export default function ProfilePage() {
                 >
                   {/* section header */}
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 text-[#456677] text-xs tracking-widest">
+                    <div className="flex items-center gap-2 text-payne-gray text-xs tracking-widest">
                       {meta.icon}
-                      <span className="text-[#f8fbf8] font-bold">{meta.label}</span>
+                      <span className="text-porcelain font-bold">{meta.label}</span>
                     </div>
                     <div className="flex-1 h-px bg-[#1a3050]" />
                     <div className="flex items-center gap-1">
@@ -682,8 +682,8 @@ export default function ProfilePage() {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className="border border-[#456677]/30 rounded-xl p-5 bg-[#060e20] mb-2">
-                          <p className="text-[10px] text-[#456677] tracking-widest uppercase mb-3">
+                        <div className="border border-payne-gray/30 rounded-xl p-5 bg-[#060e20] mb-2">
+                          <p className="text-[10px] text-payne-gray tracking-widest uppercase mb-3">
                             // new {sectionType} entry
                           </p>
                           {sectionType === 'education' && (
@@ -714,10 +714,10 @@ export default function ProfilePage() {
                           onDelete={() => deleteEducation(entry.id)}
                         >
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-sm font-bold text-[#f8fbf8]">{entry.school || '—'}</p>
+                            <p className="text-sm font-bold text-porcelain">{entry.school || '—'}</p>
                             <p className="text-xs text-[#94a3b8]">
                               {entry.degree}{entry.location ? ` · ${entry.location}` : ''}
-                              {entry.dates && <span className="ml-2 text-[#456677]">{entry.dates}</span>}
+                              {entry.dates && <span className="ml-2 text-payne-gray">{entry.dates}</span>}
                             </p>
                           </div>
                         </EntryCard>
@@ -730,7 +730,7 @@ export default function ProfilePage() {
                               className="overflow-hidden"
                             >
                               {editingId === entry.id ? (
-                                <div className="border border-[#456677]/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
+                                <div className="border border-payne-gray/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
                                   <EducationForm
                                     initial={entry}
                                     onSave={addEducation}
@@ -741,12 +741,12 @@ export default function ProfilePage() {
                                 <div className="border border-[#1a3050] border-t-0 rounded-b-xl px-4 pb-4 pt-3 bg-[#08132a] flex flex-col gap-2">
                                   {entry.coursework && (
                                     <p className="text-xs text-[#94a3b8]">
-                                      <span className="text-[#456677]">coursework: </span>{entry.coursework}
+                                      <span className="text-payne-gray">coursework: </span>{entry.coursework}
                                     </p>
                                   )}
                                   {entry.rawText ? (
                                     <div>
-                                      <p className="text-[10px] text-[#456677] mb-1">// casual notes</p>
+                                      <p className="text-[10px] text-payne-gray mb-1">// casual notes</p>
                                       <p className="text-xs text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{entry.rawText}</p>
                                     </div>
                                   ) : (
@@ -769,10 +769,10 @@ export default function ProfilePage() {
                           onDelete={() => deleteExperience(entry.id)}
                         >
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-sm font-bold text-[#f8fbf8]">{entry.company || '—'}</p>
+                            <p className="text-sm font-bold text-porcelain">{entry.company || '—'}</p>
                             <p className="text-xs text-[#94a3b8]">
                               {entry.role}{entry.location ? ` · ${entry.location}` : ''}
-                              {entry.dates && <span className="ml-2 text-[#456677]">{entry.dates}</span>}
+                              {entry.dates && <span className="ml-2 text-payne-gray">{entry.dates}</span>}
                             </p>
                           </div>
                         </EntryCard>
@@ -785,7 +785,7 @@ export default function ProfilePage() {
                               className="overflow-hidden"
                             >
                               {editingId === entry.id ? (
-                                <div className="border border-[#456677]/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
+                                <div className="border border-payne-gray/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
                                   <ExperienceForm
                                     initial={entry}
                                     onSave={addExperience}
@@ -796,10 +796,10 @@ export default function ProfilePage() {
                                 <div className="border border-[#1a3050] border-t-0 rounded-b-xl px-4 pb-4 pt-3 bg-[#08132a] flex flex-col gap-2">
                                   {entry.bullets.length > 0 && (
                                     <div className="flex flex-col gap-1">
-                                      <p className="text-[10px] text-[#456677] mb-1">// bullets (from .tex import)</p>
+                                      <p className="text-[10px] text-payne-gray mb-1">// bullets (from .tex import)</p>
                                       {entry.bullets.map((b, i) => (
                                         <p key={i} className="text-xs text-[#94a3b8] leading-relaxed flex gap-2">
-                                          <span className="text-[#456677] shrink-0">◆</span>
+                                          <span className="text-payne-gray shrink-0">◆</span>
                                           <span>{b}</span>
                                         </p>
                                       ))}
@@ -807,7 +807,7 @@ export default function ProfilePage() {
                                   )}
                                   {entry.rawText ? (
                                     <div>
-                                      <p className="text-[10px] text-[#456677] mb-1">// casual notes</p>
+                                      <p className="text-[10px] text-payne-gray mb-1">// casual notes</p>
                                       <p className="text-xs text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{entry.rawText}</p>
                                     </div>
                                   ) : (
@@ -830,10 +830,10 @@ export default function ProfilePage() {
                           onDelete={() => deleteProject(entry.id)}
                         >
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-sm font-bold text-[#f8fbf8]">{entry.name || '—'}</p>
+                            <p className="text-sm font-bold text-porcelain">{entry.name || '—'}</p>
                             <p className="text-xs text-[#94a3b8]">
                               {entry.techStack}
-                              {entry.dates && <span className="ml-2 text-[#456677]">{entry.dates}</span>}
+                              {entry.dates && <span className="ml-2 text-payne-gray">{entry.dates}</span>}
                             </p>
                           </div>
                         </EntryCard>
@@ -846,7 +846,7 @@ export default function ProfilePage() {
                               className="overflow-hidden"
                             >
                               {editingId === entry.id ? (
-                                <div className="border border-[#456677]/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
+                                <div className="border border-payne-gray/30 border-t-0 rounded-b-xl p-5 bg-[#060e20]">
                                   <ProjectForm
                                     initial={entry}
                                     onSave={addProject}
@@ -857,10 +857,10 @@ export default function ProfilePage() {
                                 <div className="border border-[#1a3050] border-t-0 rounded-b-xl px-4 pb-4 pt-3 bg-[#08132a] flex flex-col gap-2">
                                   {entry.bullets.length > 0 && (
                                     <div className="flex flex-col gap-1">
-                                      <p className="text-[10px] text-[#456677] mb-1">// bullets (from .tex import)</p>
+                                      <p className="text-[10px] text-payne-gray mb-1">// bullets (from .tex import)</p>
                                       {entry.bullets.map((b, i) => (
                                         <p key={i} className="text-xs text-[#94a3b8] leading-relaxed flex gap-2">
-                                          <span className="text-[#456677] shrink-0">◆</span>
+                                          <span className="text-payne-gray shrink-0">◆</span>
                                           <span>{b}</span>
                                         </p>
                                       ))}
@@ -868,7 +868,7 @@ export default function ProfilePage() {
                                   )}
                                   {entry.rawText ? (
                                     <div>
-                                      <p className="text-[10px] text-[#456677] mb-1">// casual notes</p>
+                                      <p className="text-[10px] text-payne-gray mb-1">// casual notes</p>
                                       <p className="text-xs text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{entry.rawText}</p>
                                     </div>
                                   ) : (
@@ -889,7 +889,7 @@ export default function ProfilePage() {
                         ) : (
                           profile.skills.map(entry => (
                             <div key={entry.id} className="flex items-start gap-3 group">
-                              <span className="text-xs text-[#456677] shrink-0 w-40 pt-px">{entry.category}</span>
+                              <span className="text-xs text-payne-gray shrink-0 w-40 pt-px">{entry.category}</span>
                               <span className="text-xs text-[#94a3b8] flex-1 leading-relaxed">{entry.technologies}</span>
                               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {editingId === entry.id ? null : (
@@ -949,8 +949,8 @@ export default function ProfilePage() {
                     'flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-jetbrains',
                     'border border-dashed transition-all duration-200 cursor-pointer',
                     showSectionPicker
-                      ? 'border-[#456677] text-[#f8fbf8] bg-[#08132a]'
-                      : 'border-[#1a3050] text-[#4a7090] hover:border-[#456677] hover:text-[#94a3b8]',
+                      ? 'border-payne-gray text-porcelain bg-[#08132a]'
+                      : 'border-[#1a3050] text-[#4a7090] hover:border-payne-gray hover:text-[#94a3b8]',
                   )}
                 >
                   <Plus size={12} />
@@ -969,9 +969,9 @@ export default function ProfilePage() {
                         <button
                           key={s}
                           onClick={() => addSection(s)}
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-[#94a3b8] hover:bg-[#0c1a38] hover:text-[#f8fbf8] transition-colors cursor-pointer"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-[#94a3b8] hover:bg-[#0c1a38] hover:text-porcelain transition-colors cursor-pointer"
                         >
-                          <span className="text-[#456677]">{SECTION_META[s].icon}</span>
+                          <span className="text-payne-gray">{SECTION_META[s].icon}</span>
                           {SECTION_META[s].label}
                         </button>
                       ))}
