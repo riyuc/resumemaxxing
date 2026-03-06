@@ -1,0 +1,239 @@
+@import url('/src/assets/fonts/satoshi/satoshi.css');
+@import url('/src/assets/fonts/jetbrains_mono/jetbrains_mono.css');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  font-family: 'Satoshi-Variable', system-ui, sans-serif;
+  line-height: 0.92;
+  font-weight: 400;
+  letter-spacing: var(--tracking-tight);
+  color-scheme: light dark;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --radius: 0.625rem;
+
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #456677;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e2e8f0;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #456677;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #456677;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #456677;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+
+@theme inline {
+  --font-satoshi: 'Satoshi-Variable', system-ui, sans-serif;
+  --font-jetbrains: 'JetBrainsMono-Variable', monospace;
+
+  /* Custom colors */
+  --color-oxford-blue: #070f27;
+  --color-payne-gray: #456677;
+  --color-h1-bold: #2f2d4b;
+  --color-porcelain: #f8fbf8;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  --background: #070f27;
+  --foreground: #f1f5f9;
+  --card: #0c1a3d;
+  --card-foreground: #f1f5f9;
+  --popover: #0c1a3d;
+  --popover-foreground: #f1f5f9;
+  --primary: #456677;
+  --primary-foreground: #ffffff;
+  --secondary: #152040;
+  --secondary-foreground: #f1f5f9;
+  --muted: #152040;
+  --muted-foreground: #94a3b8;
+  --accent: #456677;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: #1e3a5f;
+  --input: #1e3a5f;
+  --ring: #456677;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: #0c1a3d;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #456677;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #152040;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #1e3a5f;
+  --sidebar-ring: #456677;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply text-foreground font-jetbrains;
+    background-color: #030b18;
+    color: #c8d8f0;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-jetbrains;
+  }
+  p {
+    @apply font-jetbrains;
+  }
+}
+
+#root {
+  width: 100%;
+}
+
+.bg-porcelain {
+  background-color: #f8fbf8;
+}
+
+.bg-stone {
+  background-color: #eae5e3;
+}
+
+.bg-milky-white {
+  background-color: #f3f3f3;
+}
+
+.nav-items {
+  cursor: pointer;
+  text-underline-offset: 4px;
+  font-weight: 500;
+}
+
+.nav-items:hover {
+  text-decoration-line: underline;
+}
+
+/* Animated X cross-out */
+.x-animate {
+  position: relative;
+  display: inline-block;
+}
+
+.x-animate::before,
+.x-animate::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  border-radius: 2px;
+  transform: translate(-50%, -50%) rotate(20deg) scaleX(0);
+  transform-origin: center;
+}
+
+.x-animate::before {
+  animation: x-line-1 0.4s ease-out forwards;
+  animation-delay: 0.8s;
+}
+
+.x-animate::after {
+  transform: translate(-50%, -50%) rotate(-20deg) scaleX(0);
+  animation: x-line-2 0.4s ease-out forwards;
+  animation-delay: 1s;
+}
+
+@keyframes x-line-1 {
+  0% {
+    transform: translate(-50%, -50%) rotate(20deg) scaleX(0);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(20deg) scaleX(1);
+  }
+}
+
+@keyframes x-line-2 {
+  0% {
+    transform: translate(-50%, -50%) rotate(-20deg) scaleX(0);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-20deg) scaleX(1);
+  }
+}

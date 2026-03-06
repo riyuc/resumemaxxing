@@ -1,0 +1,210 @@
+\usepackage{lmodern}
+\renewcommand*\familydefault{\sfdefault}
+\usepackage[T1]{fontenc}
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
+%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
+% \end{tabular*}
+
+\begin{center}
+    \textbf{\Huge \scshape Duc Anh Nguyen} \\ \vspace{1pt}
+    \small +1 (437)-433-9262 $|$ \href{mailto:ducanh.nguyen.swe@gmail.com}{\underline{ducanh.nguyen.swe@gmail.com}} $|$
+    \href{https://linkedin.com/in/ducanhnguyen0}{\underline{linkedin.com/in/ducanhnguyen0}} $|$
+    \href{https://github.com/riyuc}{\underline{github.com/riyuc}} $|$
+    \href{https://liyuchi.dev}
+    {\underline{liyuchi.dev (portfolio)}}
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Concordia University}{Montreal, QC}
+      {Bachelor of Science in Computer Science}{Expected Graduation: Dec 2026}
+        \resumeSubItem{Relevant Coursework: Operating Systems, Data Structures \& Algorithms,  Artificial Intelligence}
+  \resumeSubHeadingListEnd
+  
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+      \resumeSubheading
+      {\textbf{Shopify}}{May 2025 -- Dec 2025}
+      {{Software Engineering Intern, Payments Infrastructure}}{Toronto, ON}
+        \resumeItemListStart
+            \resumeItem{Improved production PayPal payment success rate from 85\% to 88\% by consolidating Rails + Go payment flows into a single pathway, persisted with SQL \& ActiveRecord.}
+            \resumeItem{Reduced payments incident triage time by 50\% by implementing config-driven error mapping and standardizing logging context to speed on-call diagnosis.}
+            \resumeItem{Reduced failed merchant onboarding attempts by implementing eligibility-aware routing in React/TypeScript that queries capabilities via GraphQL and selects the correct Payments API version per merchant.}
+            \resumeItem{Prevented invalid merchant payment attempts by designing MySQL schema constraints and validation logic to enforce capability prerequisites at checkout.}
+        \resumeItemListEnd
+    \resumeSubheading
+      {\textbf{Intact Financial Corporation}}{Jan 2025 -- Apr 2025}
+      {{AI Software Developer Intern, AI Accelerators}} {Montreal, QC}
+      \resumeItemListStart
+        \resumeItem{Reduced manual claim-review volume 80\% by building a Flask triage API on AWS Bedrock that validates inputs, scores model confidence, and routes low-confidence cases to human review via configurable thresholds.}
+        \resumeItem{Accelerated GenAI experimentation process by building an internal Python SDK that unified LLM eval tooling behind a single interface \& adopted by 15 teams across Intact Labs.}
+        \resumeItem{Enabled MLflow observability for GenAI apps by building AWS Lambda ingestion that logs inference inputs/outputs, model/config metadata, and latency metrics for experiment tracking.}
+    \resumeItemListEnd
+    \resumeSubheading
+      {\textbf{Royal Bank of Canada}}{May 2024 -- Jan 2025}
+      {{DevOps Engineer Intern, Platform Engineering}}{Toronto, ON}
+      \resumeItemListStart
+        \resumeItem{Developed Spring Boot services for deployment governance (policy evaluation + auditable logs), processing 100k+ Kafka events/day, persisted with MongoDB.}
+        \resumeItem{Standardized CI security gates across RBC by integrating Snyk Code scanning via a Python/Flask service and reusable TypeScript GitHub Actions, reducing critical vulnerabilities reaching production by 25\%.}
+    \resumeItemListEnd
+    \resumeSubheading
+      {\textbf{Armonia}}{Feb 2024 -- May 2024}
+      {{Full-stack Engineer Intern}}{Montreal, QC}
+      \resumeItemListStart
+        \resumeItem{Delivered an internal MVP in 8 weeks by building end-to-end workflows (Next.js/React/TypeScript/AWS S3) to replace outsourced development, saving ~\$2K/month in contractor spend.}
+        \resumeItem{MVP won 4th place in the Pierre-Peladeau entrepreneurial competition, winning \$25,000.}
+      \resumeItemListEnd
+      
+  \resumeSubHeadingListEnd
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+        \resumeProjectHeading
+          {\textbf{AI Transcription Correction $|$} \normalfont\emph{Intact DataLab Hackathon 2nd place}}{}
+          \resumeItemListStart
+            \resumeItem{Developed an AI transcription-correction service that reduced word error rate (WER) by 20\% vs. the existing baseline; shortlisted by senior leadership for potential productionization at Intact.}\
+            \resumeItem{Improved transcript accuracy by detecting error-prone spans via perplexity scoring, chunking long sequences, and applying few-shot LLM edits with prompting + post-validation.}
+        \resumeItemListEnd
+        % \resumeProjectHeading
+        %   {\textbf{Codebase Explorer} $|$ \normalfont\emph{\small Go, React.js, Next.js, TypeScript, Python, PostgreSQL}}{}
+        %   \resumeItemListStart
+        %     \resumeItem{Developed a full-stack application that allows users to navigate complex codebases effectively by generating knowledge graphs from GitHub repositories.}\
+        %     \resumeItem{Implemented code parsing algorithm in Go, extracting structural elements like files, classes, functions, and methods for effective graph visualization.}
+        %     \resumeItem{Designed and implemented a dynamic graph visualization using React and TypeScript, allowing users to interactively explore complex code structures.}
+        % \resumeItemListEnd
+        \resumeProjectHeading
+          {\textbf{Gift Recommendation AI Agent $|$} \normalfont\emph{Python, FastAPI, React, TypeScript, OpenAI API}}{}
+          \resumeItemListStart
+            \resumeItem{Developed an agentic AI system to recommend gifts to users from their social media and multi-modal context.}
+            \resumeItem{Created a structured user-profile pipeline (interests, relationships, occasions) and a ranking step to produce top-N gift recommendations; exposed results via FastAPI endpoints consumed by a React UI.}
+          \resumeItemListEnd
+        % \resumeProjectHeading
+        %   {\textbf{Perplexity Clone} $|$ \normalfont\emph{\small Express, Next.js, TypeScript, Langchain, OpenAI, WebSockets}}{}
+        %   \resumeItemListStart
+        %     \resumeItem{Developed an AI-powered search app that delivers comprehensive answer to user query by incorporating LLM-generated responses with relevant images, videos, and web sources.}
+        %     \resumeItem{Implemented service integration using Google Cloud, Express for API Endpoint.}
+        %     \resumeItem{Productionized the service using Docker and videos stored on Google Cloud Storage Buckets}
+        %      \resumeItem{Developed a web application to interact with the service using React, TypeScript, Next.js and Tailwind}
+        %   \resumeItemListEnd
+      %   \resumeProjectHeading
+      % {\textbf{Custom Search Engine} $|$ \normalfont\emph{\small Python, SQLite3, BeautifulSoup, Flask, Pandas}}{}
+      % \resumeItemListStart
+      %   \resumeItem{Developed a custom search engine with a strict relevance and filtering system that detects and ignores websites with ads and tracking scripts, with integrated blacklist system, ensuring safe website results.}
+      % \resumeItemListEnd
+    \resumeSubHeadingListEnd
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages:}{ Ruby, Java, Python, TypeScript, JavaScript, Go, SQL, HTML, CSS} \\
+     \textbf{Frameworks/Libraries:}{ Ruby on Rails, GraphQL, Spring Boot, Flask, React, Next.js, GitHub Actions, MLflow} \\
+     \textbf{Databases \& Messaging:}{ MySQL, MongoDB, PostgreSQL, Kafka } \\
+     \textbf{Cloud/Infra:} AWS (Bedrock, Lambda, S3), Docker, Linux, Vercel \\
+    }}
+ \end{itemize}
+\end{document}
