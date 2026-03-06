@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   Plus, X, Trash2, Pencil, Check, GraduationCap, Briefcase,
-  Code2, Wrench, User, ChevronDown, ChevronRight, Upload, TerminalSquare,
-  Download, FileText, Printer, ChevronUp,
+  Code2, Wrench, User, ChevronDown, ChevronRight, ChevronLeft, Upload, TerminalSquare,
+  Download, FileText, Printer, ChevronUp, PanelLeftOpen,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { parseTexResume } from '@/utils/texParser'
@@ -113,19 +113,24 @@ const PillBtn = ({
 
 // ─── bullet reference ─────────────────────────────────────────────────────────
 
-const BulletsRef = ({ bullets }: { bullets: string[] }) => {
-  if (!bullets.length) return null
+const EditableBullets = ({ bullets, onChange }: { bullets: string[]; onChange: (bs: string[]) => void }) => {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => {
+    const el = ref.current; if (!el) return
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }, [bullets])
   return (
-    <div className="flex flex-col gap-1.5 mb-1">
-      <span className="text-[10px] text-[#4a7090] tracking-widest">// imported bullets</span>
-      <div className="border border-[#1a3050] rounded-lg px-3 py-2.5 bg-[#040a16] flex flex-col gap-1.5">
-        {bullets.map((b, i) => (
-          <p key={i} className="text-xs text-[#8aaac8] flex gap-2 leading-relaxed">
-            <span className="text-[#456677] shrink-0">◆</span>
-            <span>{b}</span>
-          </p>
-        ))}
-      </div>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[10px] text-[#456677] tracking-widest uppercase">bullets</span>
+      <textarea
+        ref={ref}
+        value={bullets.join('\n')}
+        onChange={e => onChange(e.target.value.split('\n'))}
+        className="w-full bg-[#060e20] border border-[#1e3a5f] rounded-lg px-3 py-2 text-xs text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-none overflow-hidden font-jetbrains leading-relaxed"
+        placeholder={"each line is one bullet\n—\npress Enter to add a new bullet"}
+        style={{ minHeight: '80px' }}
+      />
     </div>
   )
 }
@@ -182,14 +187,14 @@ const ExperienceForm = ({ initial, onSave, onCancel, onChange }: {
   onCancel: () => void;
   onChange?: (draft: Omit<ExperienceEntry, 'id'>) => void;
 }) => {
-  const [company, setCompany] = useState(initial?.company ?? '')
-  const [location, setLoc]   = useState(initial?.location ?? '')
-  const [role, setRole]       = useState(initial?.role ?? '')
-  const [dates, setDates]     = useState(initial?.dates ?? '')
-  const [rawText, setRaw]     = useState(initial?.rawText ?? '')
-  const bullets = initial?.bullets ?? []
+  const [company, setCompany]   = useState(initial?.company ?? '')
+  const [location, setLoc]      = useState(initial?.location ?? '')
+  const [role, setRole]         = useState(initial?.role ?? '')
+  const [dates, setDates]       = useState(initial?.dates ?? '')
+  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
+  const [rawText, setRaw]       = useState(initial?.rawText ?? '')
 
-  const draft = useMemo(() => ({ company, location, role, dates, bullets, rawText }), [company, location, role, dates, rawText]) // eslint-disable-line react-hooks/exhaustive-deps
+  const draft = useMemo(() => ({ company, location, role, dates, bullets, rawText }), [company, location, role, dates, bullets, rawText])
   const mounted = useRef(false)
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
@@ -204,7 +209,7 @@ const ExperienceForm = ({ initial, onSave, onCancel, onChange }: {
         <Field label="role" value={role} onChange={setRole} placeholder="Software Engineering Intern" />
         <Field label="dates" value={dates} onChange={setDates} placeholder="May 2025 – Dec 2025" />
       </div>
-      <BulletsRef bullets={bullets} />
+      <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1.5">
         <span className="text-[10px] text-[#4a7090] tracking-widest">// casual notes — tech used, impact, what you shipped</span>
         <textarea value={rawText} onChange={e => setRaw(e.target.value)}
@@ -226,13 +231,13 @@ const ProjectForm = ({ initial, onSave, onCancel, onChange }: {
   onCancel: () => void;
   onChange?: (draft: Omit<ProjectEntry, 'id'>) => void;
 }) => {
-  const [name, setName]      = useState(initial?.name ?? '')
-  const [techStack, setTech] = useState(initial?.techStack ?? '')
-  const [dates, setDates]    = useState(initial?.dates ?? '')
-  const [rawText, setRaw]    = useState(initial?.rawText ?? '')
-  const bullets = initial?.bullets ?? []
+  const [name, setName]         = useState(initial?.name ?? '')
+  const [techStack, setTech]    = useState(initial?.techStack ?? '')
+  const [dates, setDates]       = useState(initial?.dates ?? '')
+  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
+  const [rawText, setRaw]       = useState(initial?.rawText ?? '')
 
-  const draft = useMemo(() => ({ name, techStack, dates, bullets, rawText }), [name, techStack, dates, rawText]) // eslint-disable-line react-hooks/exhaustive-deps
+  const draft = useMemo(() => ({ name, techStack, dates, bullets, rawText }), [name, techStack, dates, bullets, rawText])
   const mounted = useRef(false)
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
@@ -246,7 +251,7 @@ const ProjectForm = ({ initial, onSave, onCancel, onChange }: {
         <Field label="dates" value={dates} onChange={setDates} placeholder="Hackathon, 2025" />
       </div>
       <Field label="tech stack" value={techStack} onChange={setTech} placeholder="Python, FastAPI, React..." />
-      <BulletsRef bullets={bullets} />
+      <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1.5">
         <span className="text-[10px] text-[#4a7090] tracking-widest">// casual notes — what it does, how you built it, results</span>
         <textarea value={rawText} onChange={e => setRaw(e.target.value)}
@@ -290,15 +295,17 @@ const SkillsForm = ({ initial, onSave, onCancel, onChange }: {
   )
 }
 
-const EntryCard = ({ children, onEdit, onDelete, expanded, onToggle }: {
+const EntryCard = ({ children, onEdit, onDelete, expanded, onToggle, isEditing }: {
   children: React.ReactNode; onEdit: () => void; onDelete: () => void;
-  expanded: boolean; onToggle: () => void;
+  expanded: boolean; onToggle: () => void; isEditing?: boolean;
 }) => (
   <div className="border border-[#1a3050] rounded-xl overflow-hidden bg-[#08132a]">
     <div className="flex items-start justify-between px-4 py-3 cursor-pointer hover:bg-[#0c1a38] transition-colors" onClick={onToggle}>
       <div className="flex-1 min-w-0">{children}</div>
       <div className="flex items-center gap-1 ml-3 shrink-0" onClick={e => e.stopPropagation()}>
-        <PillBtn variant="ghost" onClick={onEdit}><Pencil size={11} /></PillBtn>
+        <PillBtn variant="ghost" onClick={onEdit}>
+          {isEditing ? <X size={11} /> : <Pencil size={11} />}
+        </PillBtn>
         <PillBtn variant="danger" onClick={onDelete}><Trash2 size={11} /></PillBtn>
         <span className="text-[#4a7090] ml-1">
           {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -414,6 +421,7 @@ export default function CreatePage() {
   const [expandedIds, setExpandedIds]       = useState<Set<string>>(new Set())
   const [importStatus, setImportStatus]     = useState<'idle' | 'success' | 'error'>('idle')
   const [pdfImporting, setPdfImporting]     = useState(false)
+  const [sidebarOpen, setSidebarOpen]       = useState(true)
 
   // live preview draft — tracks what's currently being typed in open forms
   const [draftEntry, setDraftEntry]         = useState<DraftEntry | null>(null)
@@ -607,8 +615,13 @@ export default function CreatePage() {
   return (
     <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
 
-      {/* ══ LEFT PANEL ══ */}
-      <div className="flex-shrink-0 border-r border-[#0d1a2e] overflow-y-auto bg-[#030b18]" style={{ width: leftWidth }}>
+      {/* ══ LEFT PANEL (sidebar) ══ */}
+      <div
+        className="flex-shrink-0 border-r border-[#0d1a2e] bg-[#030b18] overflow-hidden transition-[width] duration-200"
+        style={{ width: sidebarOpen ? leftWidth : 44 }}
+      >
+        {sidebarOpen ? (
+        <div className="overflow-y-auto h-full">
         <div className="px-5 py-5 flex flex-col gap-6">
 
           {/* header */}
@@ -634,16 +647,21 @@ export default function CreatePage() {
               </DropdownBtn>
               <input ref={texRef} type="file" accept=".tex" className="hidden" onChange={handleTexImport} />
               <input ref={pdfRef} type="file" accept=".pdf" className="hidden" onChange={handlePdfImport} />
+              <button onClick={() => setSidebarOpen(false)}
+                className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1">
+                <ChevronLeft size={13} />
+              </button>
             </div>
           </div>
 
           {/* contact */}
-          <div className="border border-[#1a3050] rounded-xl p-5 bg-[#08132a]">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-[#c8d8f0] text-xs tracking-widest">
-                <User size={13} className="text-[#456677]" />
-                <span className="uppercase font-bold">Contact</span>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-[#456677] text-xs tracking-widest">
+                <User size={13} />
+                <span className="text-[#c8d8f0] font-bold text-xs uppercase">Contact</span>
               </div>
+              <div className="flex-1 h-px bg-[#1a3050]" />
               {!editingContact ? (
                 <PillBtn variant="ghost" onClick={() => { setContactDraft(profile.contact); setEditingContact(true) }}>
                   <Pencil size={11} /> edit
@@ -655,33 +673,35 @@ export default function CreatePage() {
                 </div>
               )}
             </div>
-            <AnimatePresence mode="wait">
-              {editingContact ? (
-                <motion.div key="edit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-2 gap-3">
-                  <Field label="full name" value={contactDraft.name} onChange={v => setContactDraft(p => ({ ...p, name: v }))} placeholder="Your Name" />
-                  <Field label="phone" value={contactDraft.phone} onChange={v => setContactDraft(p => ({ ...p, phone: v }))} placeholder="+1 (555) 000-0000" />
-                  <Field label="email" value={contactDraft.email} onChange={v => setContactDraft(p => ({ ...p, email: v }))} placeholder="you@email.com" />
-                  <Field label="linkedin" value={contactDraft.linkedin} onChange={v => setContactDraft(p => ({ ...p, linkedin: v }))} placeholder="handle" />
-                  <Field label="github" value={contactDraft.github} onChange={v => setContactDraft(p => ({ ...p, github: v }))} placeholder="handle" />
-                  <Field label="portfolio" value={contactDraft.portfolio} onChange={v => setContactDraft(p => ({ ...p, portfolio: v }))} placeholder="https://..." />
-                </motion.div>
-              ) : (
-                <motion.div key="display" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  {profile.contact.name ? (
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm font-bold text-[#f8fbf8]">{profile.contact.name}</p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94a3b8]">
-                        {profile.contact.email    && <span>{profile.contact.email}</span>}
-                        {profile.contact.linkedin && <span>li/{profile.contact.linkedin}</span>}
-                        {profile.contact.github   && <span>gh/{profile.contact.github}</span>}
+            <div className="border border-[#1a3050] rounded-xl p-4 bg-[#08132a]">
+              <AnimatePresence mode="wait">
+                {editingContact ? (
+                  <motion.div key="edit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-2 gap-3">
+                    <Field label="full name" value={contactDraft.name} onChange={v => setContactDraft(p => ({ ...p, name: v }))} placeholder="Your Name" />
+                    <Field label="phone" value={contactDraft.phone} onChange={v => setContactDraft(p => ({ ...p, phone: v }))} placeholder="+1 (555) 000-0000" />
+                    <Field label="email" value={contactDraft.email} onChange={v => setContactDraft(p => ({ ...p, email: v }))} placeholder="you@email.com" />
+                    <Field label="linkedin" value={contactDraft.linkedin} onChange={v => setContactDraft(p => ({ ...p, linkedin: v }))} placeholder="handle" />
+                    <Field label="github" value={contactDraft.github} onChange={v => setContactDraft(p => ({ ...p, github: v }))} placeholder="handle" />
+                    <Field label="portfolio" value={contactDraft.portfolio} onChange={v => setContactDraft(p => ({ ...p, portfolio: v }))} placeholder="https://..." />
+                  </motion.div>
+                ) : (
+                  <motion.div key="display" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    {profile.contact.name ? (
+                      <div className="flex flex-col gap-2">
+                        <p className="text-sm font-bold text-[#f8fbf8]">{profile.contact.name}</p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94a3b8]">
+                          {profile.contact.email    && <span>{profile.contact.email}</span>}
+                          {profile.contact.linkedin && <span>li/{profile.contact.linkedin}</span>}
+                          {profile.contact.github   && <span>gh/{profile.contact.github}</span>}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-[#4a7090] italic">// no contact yet — click edit</p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    ) : (
+                      <p className="text-xs text-[#4a7090] italic">// no contact yet — click edit</p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* sections */}
@@ -747,7 +767,11 @@ export default function CreatePage() {
                       {sectionType === 'education' && profile.education.map(entry => (
                         <div key={entry.id}>
                           <EntryCard expanded={expandedIds.has(entry.id)} onToggle={() => toggleExpand(entry.id)}
-                            onEdit={() => { setEditingEntry({ type: 'education', id: entry.id }); setAddingIn(null); setDraftEntry(null) }}
+                            isEditing={editId === entry.id}
+                            onEdit={() => {
+                              if (editId === entry.id) { setEditingEntry(null); setDraftEntry(null) }
+                              else { setEditingEntry({ type: 'education', id: entry.id }); setAddingIn(null); setDraftEntry(null); setExpandedIds(prev => { const n = new Set(prev); n.add(entry.id); return n }) }
+                            }}
                             onDelete={() => deleteEducation(entry.id)}>
                             <div className="flex flex-col gap-1">
                               <p className="text-sm font-bold text-[#f8fbf8]">{entry.school || '—'}</p>
@@ -782,7 +806,11 @@ export default function CreatePage() {
                       {sectionType === 'experience' && profile.experience.map(entry => (
                         <div key={entry.id}>
                           <EntryCard expanded={expandedIds.has(entry.id)} onToggle={() => toggleExpand(entry.id)}
-                            onEdit={() => { setEditingEntry({ type: 'experience', id: entry.id }); setAddingIn(null); setDraftEntry(null) }}
+                            isEditing={editId === entry.id}
+                            onEdit={() => {
+                              if (editId === entry.id) { setEditingEntry(null); setDraftEntry(null) }
+                              else { setEditingEntry({ type: 'experience', id: entry.id }); setAddingIn(null); setDraftEntry(null); setExpandedIds(prev => { const n = new Set(prev); n.add(entry.id); return n }) }
+                            }}
                             onDelete={() => deleteExperience(entry.id)}>
                             <div className="flex flex-col gap-1">
                               <p className="text-sm font-bold text-[#f8fbf8]">{entry.company || '—'}</p>
@@ -823,7 +851,11 @@ export default function CreatePage() {
                       {sectionType === 'projects' && profile.projects.map(entry => (
                         <div key={entry.id}>
                           <EntryCard expanded={expandedIds.has(entry.id)} onToggle={() => toggleExpand(entry.id)}
-                            onEdit={() => { setEditingEntry({ type: 'projects', id: entry.id }); setAddingIn(null); setDraftEntry(null) }}
+                            isEditing={editId === entry.id}
+                            onEdit={() => {
+                              if (editId === entry.id) { setEditingEntry(null); setDraftEntry(null) }
+                              else { setEditingEntry({ type: 'projects', id: entry.id }); setAddingIn(null); setDraftEntry(null); setExpandedIds(prev => { const n = new Set(prev); n.add(entry.id); return n }) }
+                            }}
                             onDelete={() => deleteProject(entry.id)}>
                             <div className="flex flex-col gap-1">
                               <p className="text-sm font-bold text-[#f8fbf8]">{entry.name || '—'}</p>
@@ -939,13 +971,25 @@ export default function CreatePage() {
           )}
 
         </div>
+        </div>
+        ) : (
+          <div className="flex flex-col items-center py-5 gap-4 h-full">
+            <button onClick={() => setSidebarOpen(true)}
+              className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-[#0c1a38]">
+              <PanelLeftOpen size={14} />
+            </button>
+            <span className="text-[10px] text-[#4a7090] font-jetbrains [writing-mode:vertical-rl] tracking-widest rotate-180 mt-2">profile</span>
+          </div>
+        )}
       </div>
 
       {/* ══ RESIZE HANDLE ══ */}
+      {sidebarOpen && (
       <div
         onMouseDown={onDividerMouseDown}
         className="w-1 flex-shrink-0 bg-[#0d1a2e] hover:bg-[#456677]/40 active:bg-[#456677]/70 transition-colors cursor-col-resize"
       />
+      )}
 
       {/* ══ RIGHT PANEL ══ */}
       <div className="flex-1 flex flex-col overflow-hidden bg-[#060e20] min-w-0">

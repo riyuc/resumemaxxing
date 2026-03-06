@@ -165,22 +165,34 @@ function parseProjects(content: string): ProjectEntry[] {
     const cmdIdx = content.indexOf(cmd, searchFrom)
     if (cmdIdx === -1) break
 
-    const { args, end } = extractNArgs(content, cmdIdx + cmd.length, 2)
-    if (args.length < 1) { searchFrom = cmdIdx + 1; continue }
+    // The header arg frequently has an unclosed outer brace in popular resume templates,
+    // so we read the first non-empty line after the command instead of brace-balancing.
+    let linePos = cmdIdx + cmd.length
+    // skip to next line
+    while (linePos < content.length && content[linePos] !== '\n') linePos++
+    while (linePos < content.length && content[linePos] === '\n') linePos++
+    const lineEnd = content.indexOf('\n', linePos)
+    const headerLine = content.slice(linePos, lineEnd >= 0 ? lineEnd : undefined)
+    const end = lineEnd >= 0 ? lineEnd : content.length
 
-    const header = args[0]
-    const dates = stripLatex(args[1] || '')
+    if (!headerLine.trim()) { searchFrom = cmdIdx + 1; continue }
 
+    // Also try to grab a second arg (dates) via brace extraction if the header closed properly
+    const { args: dateArgs } = extractNArgs(content, cmdIdx + cmd.length, 2)
+    const dates = dateArgs.length >= 2 ? stripLatex(dateArgs[1]) : ''
+
+    const cleanHeader = stripLatex(headerLine)
     let name = ''
     let techStack = ''
-    const cleanHeader = stripLatex(header)
     const pipeIdx = cleanHeader.indexOf('|')
     if (pipeIdx >= 0) {
       name = cleanHeader.slice(0, pipeIdx).trim()
       techStack = cleanHeader.slice(pipeIdx + 1).trim()
     } else {
-      name = cleanHeader
+      name = cleanHeader.replace(/[{}]/g, '').trim()
     }
+
+    if (!name) { searchFrom = cmdIdx + 1; continue }
 
     const nextCmdIdx = content.indexOf(cmd, end)
     const entryContent = content.slice(end, nextCmdIdx >= 0 ? nextCmdIdx : undefined)

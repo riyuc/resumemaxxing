@@ -120,22 +120,18 @@ const PillBtn = ({
 
 // ─── bullet reference (read-only in edit forms) ───────────────────────────────
 
-const BulletsRef = ({ bullets }: { bullets: string[] }) => {
-  if (!bullets.length) return null
-  return (
-    <div className="flex flex-col gap-1 mb-1">
-      <span className="text-[10px] text-[#4a7090] tracking-widest uppercase">// imported bullets</span>
-      <div className="border border-[#1a3050] rounded px-3 py-2 bg-[#040a16] flex flex-col gap-1">
-        {bullets.map((b, i) => (
-          <p key={i} className="text-xs text-[#8aaac8] flex gap-2 leading-relaxed">
-            <span className="text-[#456677] shrink-0">◆</span>
-            <span>{b}</span>
-          </p>
-        ))}
-      </div>
-    </div>
-  )
-}
+const EditableBullets = ({ bullets, onChange }: { bullets: string[]; onChange: (bs: string[]) => void }) => (
+  <div className="flex flex-col gap-1.5">
+    <span className="text-[10px] text-[#456677] tracking-widest uppercase">bullets</span>
+    <textarea
+      value={bullets.join('\n')}
+      onChange={e => onChange(e.target.value.split('\n'))}
+      rows={Math.max(4, bullets.length + 1)}
+      className="w-full bg-[#060e20] border border-[#1e3a5f] rounded px-3 py-2 text-xs text-[#f8fbf8] placeholder:text-[#4a7090] focus:outline-none focus:border-[#456677] resize-y font-jetbrains leading-relaxed"
+      placeholder={"each line is one bullet\n—\npress Enter to add a new bullet"}
+    />
+  </div>
+)
 
 // ─── entry forms ──────────────────────────────────────────────────────────────
 
@@ -194,8 +190,8 @@ const ExperienceForm = ({
   const [location, setLocation] = useState(initial?.location ?? '')
   const [role, setRole]         = useState(initial?.role ?? '')
   const [dates, setDates]       = useState(initial?.dates ?? '')
+  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
   const [rawText, setRawText]   = useState(initial?.rawText ?? '')
-  const bullets = initial?.bullets ?? []
 
   return (
     <div className="flex flex-col gap-3">
@@ -205,7 +201,7 @@ const ExperienceForm = ({
         <Field label="role / title" value={role} onChange={setRole} placeholder="Software Engineering Intern" />
         <Field label="dates" value={dates} onChange={setDates} placeholder="May 2025 – Dec 2025" />
       </div>
-      <BulletsRef bullets={bullets} />
+      <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1">
         <span className="text-[10px] text-[#456677] tracking-widest uppercase">
           // what did you do there? — be casual
@@ -239,8 +235,8 @@ const ProjectForm = ({
   const [name, setName]         = useState(initial?.name ?? '')
   const [techStack, setTech]    = useState(initial?.techStack ?? '')
   const [dates, setDates]       = useState(initial?.dates ?? '')
+  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
   const [rawText, setRawText]   = useState(initial?.rawText ?? '')
-  const bullets = initial?.bullets ?? []
 
   return (
     <div className="flex flex-col gap-3">
@@ -249,7 +245,7 @@ const ProjectForm = ({
         <Field label="dates / context" value={dates} onChange={setDates} placeholder="Intact Hackathon, 2025" />
       </div>
       <Field label="tech stack" value={techStack} onChange={setTech} placeholder="Python, FastAPI, React, OpenAI API..." />
-      <BulletsRef bullets={bullets} />
+      <EditableBullets bullets={bullets} onChange={setBullets} />
       <div className="flex flex-col gap-1">
         <span className="text-[10px] text-[#456677] tracking-widest uppercase">
           // describe the project — be casual
@@ -586,7 +582,7 @@ export default function ProfilePage() {
 
         {/* ── contact section ── */}
         <div className="mb-8 border border-[#1a3050] rounded-xl p-5 bg-[#08132a]">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-[#f8fbf8] text-xs tracking-widest">
               <User size={13} className="text-[#456677]" />
               <span className="uppercase">Contact</span>
