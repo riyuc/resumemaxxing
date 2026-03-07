@@ -348,17 +348,39 @@ export function generateResumeHtml(
       return `<div class="rawtext">${esc(raw)}</div>`
     return ''
   }
+  console.log(eduEntries.entries)
 
   const eduHtml = eduEntries.length === 0 ? '' : sec('Education', eduEntries.map(e => `
     <div class="entry">
-      <div class="row"><span class="org"${at('school', 'education', e.id)}>${esc(e.school)}</span><span class="date"${at('location', 'education', e.id)}>${esc(e.location)}</span></div>
-      <div class="row sub"><span${at('degree', 'education', e.id)}>${esc(e.degree)}</span><span${at('dates', 'education', e.id)}>${esc(e.dates)}</span></div>
+      <div class="row">
+        <span class="org"${at('school', 'education', e.id)}>
+          ${esc(e.school)}
+        </span>
+        <span class="date"${at('location', 'education', e.id)}>
+          ${esc(e.location)}
+        </span>
+      </div>
+      <div class="row sub">
+        <span${at('degree', 'education', e.id)}>
+          ${esc(e.degree)}
+        </span>
+        <span${at('dates', 'education', e.id)}>
+          ${esc(e.dates)}
+        </span>
+      </div>
       ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> <span${at('coursework', 'education', e.id)}>${esc(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</span></div>` : ''}
     </div>`).join(''))
 
   const expHtml = expEntries.length === 0 ? '' : sec('Experience', expEntries.map(e => `
     <div class="entry">
-      <div class="row"><span class="org"${at('company', 'experience', e.id)}>${esc(e.company)}</span><span class="date"${at('dates', 'experience', e.id)}>${esc(e.dates)}</span></div>
+      <div class="row">
+        <span class="org"${at('company', 'experience', e.id)}>
+          ${esc(e.company)}
+        </span>
+        <span class="date"${at('dates', 'experience', e.id)}>
+          ${esc(e.dates)}
+        </span>
+      </div>
       <div class="row sub"><span${at('role', 'experience', e.id)}>${esc(e.role)}</span><span${at('location', 'experience', e.id)}>${esc(e.location)}</span></div>
       ${blist(e.bullets, e.rawText, 'experience', e.id)}
     </div>`).join(''))
