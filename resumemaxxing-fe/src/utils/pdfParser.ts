@@ -126,7 +126,10 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
     return { prefix: s.slice(0, m.index).trim(), dates: m[0].trim() }
   }
   // Strip trailing "City, Province/State" location appended from same-row PDF merge
-  const LOCATION_RE = /,?\s+([A-Za-z][a-zA-Z\s]+,\s*[A-Z]{2})$/
+  // Single-word city only (e.g. "Montreal, QC") to avoid over-matching multi-word school/role names
+  const LOCATION_RE = /,?\s+([A-Z][a-zA-Z]+,\s*[A-Z]{2})$/
+  // Single date like "Dec 2026" or "December 2026" (for graduation dates etc.)
+  const SINGLE_DATE_RE = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}\b/i
   const stripLocation = (s: string): { text: string; location: string } => {
     const m = LOCATION_RE.exec(s)
     if (!m) return { text: s, location: '' }
@@ -141,7 +144,18 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
     let school = '', degree = '', location = '', dates = '', coursework = ''
     for (const line of lines) {
       if (/relevant coursework/i.test(line)) { coursework = line.replace(/relevant coursework[:\s]*/i, ''); continue }
-      if (/^(b\.|m\.|ph\.?d|bachelor|master|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(line)) { degree = line; continue }
+      if (/^(b\.|m\.|ph\.?d|bachelor|master|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(line)) {
+        const dm = SINGLE_DATE_RE.exec(line)
+        if (dm && !dates) {
+          // Preserve "Expected Graduation:" label in the dates field
+          const gradIdx = line.search(/expected graduation[:\s]*/i)
+          dates = gradIdx !== -1 ? line.slice(gradIdx).trim() : dm[0]
+          degree = line.slice(0, dm.index).replace(/\s*(?:expected graduation|graduation)[:\s]*/i, '').trim()
+        } else {
+          degree = line
+        }
+        continue
+      }
       if (hasDate(line)) {
         const { prefix, dates: d } = splitDateLine(line)
         dates = d
@@ -166,38 +180,33 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
       company = ''; role = ''; location = ''; dates = ''; bullets = []
     }
     for (const line of lines) {
-      // Bullet or lowercase continuation of previous bullet (wrapped line)
+      // Bullet marker — skip empty ones (bare • with no text on same line)
       if (isBullet(line)) {
-        bullets.push(line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim())
+        const text = line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim()
+        if (text) bullets.push(text)
         continue
       }
-      if (bullets.length > 0 && /^[a-z]/.test(line)) {
-        bullets[bullets.length - 1] += ' ' + line
-        continue
-      }
-      // Line containing a date range — may also have company prefix on the same line
+      // Line containing a date range — new entry always starts with company+date in this template
       if (hasDate(line)) {
         const { prefix, dates: d } = splitDateLine(line)
-        if (prefix && company) {
-          // New company+date header → flush current entry and start fresh
-          flush(); company = prefix; dates = d
-        } else if (prefix) {
-          company = prefix; dates = d
-        } else {
-          dates = d
-        }
+        if (prefix && company) { flush(); company = prefix; dates = d }
+        else if (prefix) { company = prefix; dates = d }
+        else { dates = d }
         continue
       }
       // Non-bullet, non-date line
       if (!company) { company = line; continue }
       if (!role) {
-        // Strip trailing location merged from same PDF row (e.g. "Role Title    Toronto, ON")
         const { text, location: loc } = stripLocation(line)
         role = text; if (loc) location = loc
         continue
       }
-      // Another header line after role is set → new entry
-      flush(); company = line
+      // company+role already set: must be bullet content (wrapped lines, missing bullet marker, etc.)
+      if (bullets.length > 0) {
+        bullets[bullets.length - 1] += ' ' + line
+      } else {
+        bullets.push(line)
+      }
     }
     flush()
     return entries
@@ -214,14 +223,24 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
       name = ''; techStack = ''; dates = ''; bullets = []
     }
     for (const line of lines) {
-      if (isBullet(line)) { bullets.push(line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim()); continue }
-      if (bullets.length > 0 && /^[a-z]/.test(line)) { bullets[bullets.length - 1] += ' ' + line; continue }
+      if (isBullet(line)) {
+        const text = line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim()
+        if (text) bullets.push(text)
+        continue
+      }
       if (hasDate(line)) { const { prefix, dates: d } = splitDateLine(line); dates = d; if (prefix && !name) name = prefix; continue }
-      // Pipe-separated "Name | Tech Stack"
-      if (line.includes('|')) { if (name) flush(); const [n, t] = line.split('|'); name = n.trim(); techStack = t?.trim() ?? ''; continue }
+      // Pipe-separated "Name | Tech Stack" header — only when pipe is near the start (project names are short)
+      const pipeIdx = line.indexOf('|')
+      if (pipeIdx > 0 && pipeIdx < 50) {
+        if (name) flush()
+        name = line.slice(0, pipeIdx).trim(); techStack = line.slice(pipeIdx + 1).trim()
+        continue
+      }
       if (!name) { name = line; continue }
       if (!techStack && bullets.length === 0) { techStack = line; continue }
-      flush(); name = line
+      // name+techStack already set: bullet content (wrapped lines or missing marker)
+      if (bullets.length > 0) { bullets[bullets.length - 1] += ' ' + line }
+      else { bullets.push(line) }
     }
     flush()
     return entries

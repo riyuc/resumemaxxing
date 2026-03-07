@@ -1,5 +1,83 @@
 import type { ProfileData, SectionType } from '@/types/profile'
 
+// ─── Resume formatting ────────────────────────────────────────────────────────
+
+export type FontOption = {
+  label: string
+  value: string           // CSS font-family string
+  googleFont?: string     // Google Fonts URL param (family + variants)
+  customLink?: string     // Full href for non-Google-Fonts stylesheets
+  category: 'monospace' | 'serif' | 'sans-serif'
+}
+
+export const FONT_OPTIONS: FontOption[] = [
+  // ── Monospace (common in TeX resumes) ──────────────────────────────────────
+  { label: 'Source Code Pro', value: "'Source Code Pro', monospace",
+    googleFont: 'Source+Code+Pro:ital,wght@0,400;0,600;0,700;1,400', category: 'monospace' },
+  { label: 'JetBrains Mono',  value: "'JetBrains Mono', monospace",
+    googleFont: 'JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400',  category: 'monospace' },
+  { label: 'Fira Code',       value: "'Fira Code', monospace",
+    googleFont: 'Fira+Code:wght@400;600;700',                          category: 'monospace' },
+  { label: 'Roboto Mono',     value: "'Roboto Mono', monospace",
+    googleFont: 'Roboto+Mono:ital,wght@0,400;0,600;0,700;1,400',      category: 'monospace' },
+  { label: 'Courier New',     value: "'Courier New', monospace",       category: 'monospace' },
+
+  // ── Serif (classic TeX / academic look) ────────────────────────────────────
+  // Computer Modern fonts — exact family names as declared in the CDN CSS
+  // CMU Serif = default LaTeX font (no font package in preamble)
+  { label: 'Computer Modern (default LaTeX)', value: "'Computer Modern Serif', serif",
+    customLink: 'https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/fonts.css',
+    category: 'serif' },
+  // CMU Sans ≈ \usepackage{lmodern} + \renewcommand*\familydefault{\sfdefault}
+  { label: 'Computer Modern Sans (lmodern + sfdefault)', value: "'Computer Modern Sans', sans-serif",
+    customLink: 'https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/fonts.css',
+    category: 'sans-serif' },
+  // CMU Typewriter ≈ \ttdefault in TeX
+  { label: 'Computer Modern Typewriter', value: "'Computer Modern Typewriter', monospace",
+    customLink: 'https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/fonts.css',
+    category: 'monospace' },
+  { label: 'EB Garamond',     value: "'EB Garamond', serif",
+    googleFont: 'EB+Garamond:ital,wght@0,400;0,600;0,700;1,400',      category: 'serif' },
+  { label: 'Libre Baskerville', value: "'Libre Baskerville', serif",
+    googleFont: 'Libre+Baskerville:ital,wght@0,400;0,700;1,400',       category: 'serif' },
+  { label: 'Crimson Text',    value: "'Crimson Text', serif",
+    googleFont: 'Crimson+Text:ital,wght@0,400;0,600;1,400',            category: 'serif' },
+  { label: 'Palatino Linotype', value: "'Palatino Linotype', Palatino, serif", category: 'serif' },
+  { label: 'Georgia',         value: 'Georgia, serif',                 category: 'serif' },
+
+  // ── Sans-serif ─────────────────────────────────────────────────────────────
+  { label: 'Inter',           value: "'Inter', sans-serif",
+    googleFont: 'Inter:wght@400;600;700',                               category: 'sans-serif' },
+  { label: 'Lato',            value: "'Lato', sans-serif",
+    googleFont: 'Lato:ital,wght@0,400;0,700;1,400',                    category: 'sans-serif' },
+  { label: 'Raleway',         value: "'Raleway', sans-serif",
+    googleFont: 'Raleway:ital,wght@0,400;0,600;0,700;1,400',           category: 'sans-serif' },
+]
+
+export type ResumeFormat = {
+  fontFamily: string      // CSS font-family value
+  fontSize: number        // body font size in pt
+  lineHeight: number      // line height multiplier
+  pageMargin: number      // page padding in inches
+  sectionSpacing: number  // margin-bottom between sections (px)
+  entrySpacing: number    // margin-bottom between entries (px)
+  nameSize: number        // name heading font size in pt
+  bulletSize: number      // bullet list item font size in pt
+}
+
+// LaTeX 11pt document class size scale (used to derive sub-sizes accurately):
+//   \small = 10pt, \large = 12pt, \Large = 14.4pt, \huge = 20.74pt, \Huge = 24.88pt
+export const DEFAULT_FORMAT: ResumeFormat = {
+  fontFamily: "'Computer Modern Serif', serif",
+  fontSize: 11,       // \documentclass[letterpaper,11pt]{article}
+  lineHeight: 1.35,
+  pageMargin: 0.5,    // ~0.5in all sides (after margin adjustments in preamble)
+  sectionSpacing: 10,
+  entrySpacing: 4,
+  nameSize: 25,       // \Huge at 11pt class = 24.88pt
+  bulletSize: 10,     // \small at 11pt class = 10pt (used for role, location, bullets, skills)
+}
+
 export type ExportSelection = {
   education: string[]
   experience: string[]
@@ -231,82 +309,140 @@ export function exportAsMd(profile: ProfileData, selection?: ExportSelection): s
 
 // ─── HTML preview (mirrors compiled .tex output) ─────────────────────────────
 
-export type ResumeHtmlOpts = { editable?: boolean }
+export type ResumeHtmlOpts = { editable?: boolean; format?: ResumeFormat }
 
-const RESUME_CSS = `
+function makeFontImport(fmt: ResumeFormat): string {
+  const fontOpt = FONT_OPTIONS.find(f => f.value === fmt.fontFamily)
+  if (fontOpt?.customLink)  return `@import url('${fontOpt.customLink}');`
+  if (fontOpt?.googleFont)  return `@import url('https://fonts.googleapis.com/css2?family=${fontOpt.googleFont}&display=swap');`
+  return ''
+}
+
+function makeResumeCss(fmt: ResumeFormat): string {
+  const fontImport = makeFontImport(fmt)
+  const m = fmt.pageMargin
+  // LaTeX 11pt class size scale (proportional to base fontSize):
+  //   \small = fontSize*(10/11)   \large = fontSize*(12/11)   \Huge = fontSize*(24.88/11)
+  const smallPt  = (fmt.fontSize * 10 / 11).toFixed(2)  // \small
+  const largePt  = (fmt.fontSize * 12 / 11).toFixed(2)  // \large  (section titles)
+  return `${fontImport}
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  @page { size: letter; margin: 0.5in; }
+  @page { size: letter; margin: ${m}in; }
   body {
-    font-family: 'Source Code Pro', 'JetBrains Mono', 'Courier New', monospace;
-    font-size: 10.5pt;
-    line-height: 1.45;
+    font-family: ${fmt.fontFamily};
+    font-size: ${fmt.fontSize}pt;
+    line-height: ${fmt.lineHeight};
     color: #000;
     background: #fff;
-    padding: 0.5in;
+    padding: ${m}in;
     max-width: 8.5in;
     margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1;
   }
   a { color: inherit; text-decoration: underline; }
 
-  /* Header */
-  .hdr { text-align: center; margin-bottom: 14px; }
+  /*
+   * Header:  \textbf{\Huge \scshape Name} \\ \vspace{1pt} \small contact
+   * \Huge at 11pt class = 24.88pt (nameSize default = 25)
+   * No extra letter-spacing — \scshape does not add tracking in LaTeX
+   */
+  .hdr { text-align: center; margin-bottom: 12px; }
   .hdr h1 {
-    font-size: 21pt;
+    font-size: ${fmt.nameSize}pt;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     font-variant: small-caps;
+    /* no letter-spacing: LaTeX \scshape adds none */
   }
-  .hdr .contact {
-    font-size: 8.5pt;
-    color: #222;
-    margin-top: 3px;
-  }
-  .hdr .contact .sep { margin: 0 5px; color: #666; }
+  /* \small contact line, \vspace{1pt} gap */
+  .hdr .contact { font-size: ${smallPt}pt; color: #111; margin-top: 2px; }
+  /* $|$ separator: thin math space each side, rendered as | */
+  .hdr .contact .sep { margin: 0 4px; }
 
-  /* Section */
-  section { margin-bottom: 10px; }
+  /*
+   * Section: \vspace{-4pt}\scshape\raggedright\large + \titlerule\vspace{-5pt}
+   * \large at 11pt = 12pt, font-weight 400 (NOT bold), small-caps, no tracking
+   * titlerule = full-width 0.4pt rule below title
+   */
+  section { margin-bottom: ${fmt.sectionSpacing}px; }
   .sec-title {
-    font-size: 10.5pt;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: ${largePt}pt;
+    font-weight: 400;
     font-variant: small-caps;
-    letter-spacing: 0.04em;
-    border-bottom: 1px solid #000;
-    padding-bottom: 1px;
-    margin-bottom: 5px;
+    /* no letter-spacing */
+    border-bottom: 0.4pt solid #000;
+    padding-bottom: 0;
+    margin-bottom: 4px;
+    margin-top: 2px;
   }
 
-  /* Entry rows (mimics tabularx) */
-  .entry { margin-bottom: 5px; }
+  /*
+   * \resumeSubHeadingListStart = \begin{itemize}[leftmargin=0.15in, label={}]
+   * All entries are indented 0.15in from left margin
+   */
+  .entries { padding-left: 0.15in; }
+
+  /*
+   * \resumeSubheading row 1: \textbf{#1} & #2
+   * Both args are normalsize (no \small) → fontSize pt
+   * #1 is bold, #2 is normal weight
+   */
+  .entry { margin-bottom: ${fmt.entrySpacing}px; }
   .row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 8px;
   }
-  .org   { font-weight: 700; font-size: 10.5pt; }
-  .sub   { font-style: italic; font-size: 9pt; margin-top: 0; }
-  .date  { font-size: 9pt; white-space: nowrap; }
-  .cw    { font-size: 9pt; color: #222; margin-top: 2px; }
+  .org  { font-weight: 700; font-size: ${fmt.fontSize}pt; }  /* \textbf{company/school} */
+  .r1   { font-size: ${fmt.fontSize}pt; white-space: nowrap; font-weight: 400; } /* right col row 1: normalsize */
 
-  /* Bullets */
-  .bullets { margin-top: 3px; padding-left: 18px; }
-  .bullets li { font-size: 9pt; margin-bottom: 1.5px; list-style-type: disc; }
+  /*
+   * \resumeSubheading row 2: \textit{\small #3} & \textit{\small #4}
+   * Both: \small (smallPt) + \textit (italic)
+   */
+  .sub  { font-style: italic; font-size: ${smallPt}pt; margin-top: 1px; }
+
+  /* Relevant coursework line — \small */
+  .cw   { font-size: ${smallPt}pt; color: #111; margin-top: 1px; }
+
+  /*
+   * \resumeProjectHeading: \small#1 & #2  ← \small applies to ENTIRE row
+   * name = \textbf, techStack = \normalfont\emph (normal weight, italic)
+   * dates (#2) also \small since the whole row is inside \small
+   */
+  .proj-row .org { font-size: ${smallPt}pt; }
+  .proj-row .r1  { font-size: ${smallPt}pt; }
+
+  /*
+   * \resumeItem: \item\small{#1}
+   * \small, normal weight, list-style disc
+   * \begin{itemize} default: leftmargin ~2.5em at \small size
+   */
+  .bullets { margin-top: 1px; padding-left: 1.5em; }
+  .bullets li { font-size: ${smallPt}pt; margin-bottom: 0; list-style-type: disc; line-height: ${fmt.lineHeight}; }
   .rawtext {
-    font-size: 9pt; color: #555; font-style: italic;
-    margin-top: 3px; padding-left: 8px; border-left: 2px solid #ccc;
+    font-size: ${smallPt}pt; color: #555; font-style: italic;
+    margin-top: 2px; padding-left: 8px; border-left: 2px solid #ccc;
   }
 
-  /* Skills */
-  .sk-row { font-size: 9pt; margin-bottom: 2px; }
-  .sk-cat { font-weight: 700; }
+  /*
+   * Technical Skills: \begin{itemize}[leftmargin=0.15in, label={}]
+   *   \small{\item{ \textbf{cat}: techs \\ }}
+   */
+  .sk-list { padding-left: 0.15in; }
+  .sk-row  { font-size: ${smallPt}pt; margin-bottom: 1px; }
+  .sk-cat  { font-weight: 700; }
 
   @media print {
     body { padding: 0; }
     a { text-decoration: none; }
   }
 `
+}
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -318,6 +454,7 @@ export function generateResumeHtml(
   opts?: ResumeHtmlOpts,
 ): string {
   const editable = opts?.editable ?? false
+  const fmt = opts?.format ?? DEFAULT_FORMAT
   const c = profile.contact
 
   // Produces data-attribute string + contenteditable when editable
@@ -348,59 +485,56 @@ export function generateResumeHtml(
       return `<div class="rawtext">${esc(raw)}</div>`
     return ''
   }
-  console.log(eduEntries.entries)
-
-  const eduHtml = eduEntries.length === 0 ? '' : sec('Education', eduEntries.map(e => `
+  // Education: \resumeSubheading{school}{location}{degree}{dates}
+  //   row1: \textbf{school}(normalsize) & location(normalsize)
+  //   row2: \textit{\small degree} & \textit{\small dates}
+  const eduHtml = eduEntries.length === 0 ? '' : sec('Education', `<div class="entries">${eduEntries.map(e => `
     <div class="entry">
       <div class="row">
-        <span class="org"${at('school', 'education', e.id)}>
-          ${esc(e.school)}
-        </span>
-        <span class="date"${at('location', 'education', e.id)}>
-          ${esc(e.location)}
-        </span>
+        <span class="org"${at('school', 'education', e.id)}>${esc(e.school)}</span>
+        <span class="r1"${at('location', 'education', e.id)}>${esc(e.location)}</span>
       </div>
       <div class="row sub">
-        <span${at('degree', 'education', e.id)}>
-          ${esc(e.degree)}
-        </span>
-        <span${at('dates', 'education', e.id)}>
-          ${esc(e.dates)}
-        </span>
+        <span${at('degree', 'education', e.id)}>${esc(e.degree)}</span>
+        <span${at('dates', 'education', e.id)}>${esc(e.dates)}</span>
       </div>
       ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> <span${at('coursework', 'education', e.id)}>${esc(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</span></div>` : ''}
-    </div>`).join(''))
+    </div>`).join('')}</div>`)
 
-  const expHtml = expEntries.length === 0 ? '' : sec('Experience', expEntries.map(e => `
+  // Experience: \resumeSubheading{company}{dates}{role}{location}
+  //   row1: \textbf{company}(normalsize) & dates(normalsize)
+  //   row2: \textit{\small role} & \textit{\small location}
+  const expHtml = expEntries.length === 0 ? '' : sec('Experience', `<div class="entries">${expEntries.map(e => `
     <div class="entry">
       <div class="row">
-        <span class="org"${at('company', 'experience', e.id)}>
-          ${esc(e.company)}
-        </span>
-        <span class="date"${at('dates', 'experience', e.id)}>
-          ${esc(e.dates)}
-        </span>
+        <span class="org"${at('company', 'experience', e.id)}>${esc(e.company)}</span>
+        <span class="r1"${at('dates', 'experience', e.id)}>${esc(e.dates)}</span>
       </div>
-      <div class="row sub"><span${at('role', 'experience', e.id)}>${esc(e.role)}</span><span${at('location', 'experience', e.id)}>${esc(e.location)}</span></div>
+      <div class="row sub">
+        <span${at('role', 'experience', e.id)}>${esc(e.role)}</span>
+        <span${at('location', 'experience', e.id)}>${esc(e.location)}</span>
+      </div>
       ${blist(e.bullets, e.rawText, 'experience', e.id)}
-    </div>`).join(''))
+    </div>`).join('')}</div>`)
 
-  const projHtml = projEntries.length === 0 ? '' : sec('Projects', projEntries.map(e => `
+  // Projects: \resumeProjectHeading{\textbf{name} $|$ \normalfont\emph{tech}}{dates}
+  //   \small applies to ENTIRE row → both name/tech and dates are \small (smallPt)
+  const projHtml = projEntries.length === 0 ? '' : sec('Projects', `<div class="entries">${projEntries.map(e => `
     <div class="entry">
-      <div class="row">
-        <span class="org" style="font-size:9.5pt">
-          <span${at('name', 'projects', e.id)}>${esc(e.name)}</span>${e.techStack ? ` <span style="font-weight:400;font-style:italic"${at('techStack', 'projects', e.id)}>| ${esc(e.techStack)}</span>` : ''}
-        </span>
-        <span class="date"${at('dates', 'projects', e.id)}>${esc(e.dates)}</span>
+      <div class="row proj-row">
+        <span class="org"${at('name', 'projects', e.id)}>${esc(e.name)}${e.techStack ? ` <span style="font-weight:400;font-style:italic"${at('techStack', 'projects', e.id)}>| ${esc(e.techStack)}</span>` : ''}</span>
+        <span class="r1"${at('dates', 'projects', e.id)}>${esc(e.dates)}</span>
       </div>
       ${blist(e.bullets, e.rawText, 'projects', e.id)}
-    </div>`).join(''))
+    </div>`).join('')}</div>`)
 
-  const skillHtml = skillEntries.length === 0 ? '' : sec('Technical Skills',
+  // Skills: \begin{itemize}[leftmargin=0.15in,label={}] \small \textbf{cat}: techs
+  const skillHtml = skillEntries.length === 0 ? '' : sec('Technical Skills', `<div class="sk-list">${
     skillEntries.map(e =>
       `<div class="sk-row"><span class="sk-cat"${at('category', 'skills', e.id)}>${esc(e.category)}:</span> <span${at('technologies', 'skills', e.id)}>${esc(e.technologies)}</span></div>`
-    ).join(''))
+    ).join('')}</div>`)
 
+  const resumeCss = makeResumeCss(fmt)
   const editCss = editable ? `
   [data-rf] { cursor: text; border-radius: 2px; outline: none; }
   [data-rf]:hover:not(:focus) { outline: 1px dashed rgba(70,102,119,0.45); }
@@ -427,9 +561,7 @@ export function generateResumeHtml(
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <style>${RESUME_CSS}${editCss}</style>
+  <style>${resumeCss}${editCss}</style>
 </head>
 <body>
   <div class="hdr">

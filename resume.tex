@@ -1,6 +1,10 @@
-\usepackage{lmodern}
-\renewcommand*\familydefault{\sfdefault}
-\usepackage[T1]{fontenc}
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
 \documentclass[letterpaper,11pt]{article}
 
 \usepackage{latexsym}
@@ -30,7 +34,7 @@
 
 
 \pagestyle{fancy}
-\fancyhf{}
+\fancyhf{} % clear all header and footer fields
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -109,11 +113,9 @@
 
 \begin{center}
     \textbf{\Huge \scshape Duc Anh Nguyen} \\ \vspace{1pt}
-    \small +1 (437)-433-9262 $|$ \href{mailto:ducanh.nguyen.swe@gmail.com}{\underline{ducanh.nguyen.swe@gmail.com}} $|$
-    \href{https://linkedin.com/in/ducanhnguyen0}{\underline{linkedin.com/in/ducanhnguyen0}} $|$
-    \href{https://github.com/riyuc}{\underline{github.com/riyuc}} $|$
-    \href{https://liyuchi.dev}
-    {\underline{liyuchi.dev (portfolio)}}
+    \small +1 437-433-9262 $|$ \href{mailto:bongbang0101@gmail.com}{\underline{Email}} $|$ 
+    \href{https://linkedin.com/in/ducanhnguyen0}{\underline{LinkedIn}} $|$
+    \href{https://github.com/riyuc}{\underline{GitHub}}
 \end{center}
 
 
@@ -122,68 +124,75 @@
   \resumeSubHeadingListStart
     \resumeSubheading
       {Concordia University}{Montreal, QC}
-      {Bachelor of Science in Computer Science}{Expected Graduation: Dec 2026}
-        \resumeSubItem{Relevant Coursework: Operating Systems, Data Structures \& Algorithms,  Artificial Intelligence}
+      {Bachelor of Computer Science, Computer Science Major}{Expected Graduation: Aug 2025}
   \resumeSubHeadingListEnd
   
 %-----------EXPERIENCE-----------
 \section{Experience}
   \resumeSubHeadingListStart
       \resumeSubheading
-      {\textbf{Shopify}}{May 2025 -- Dec 2025}
-      {{Software Engineering Intern, Payments Infrastructure}}{Toronto, ON}
-        \resumeItemListStart
-            \resumeItem{Improved production PayPal payment success rate from 85\% to 88\% by consolidating Rails + Go payment flows into a single pathway, persisted with SQL \& ActiveRecord.}
-            \resumeItem{Reduced payments incident triage time by 50\% by implementing config-driven error mapping and standardizing logging context to speed on-call diagnosis.}
-            \resumeItem{Reduced failed merchant onboarding attempts by implementing eligibility-aware routing in React/TypeScript that queries capabilities via GraphQL and selects the correct Payments API version per merchant.}
-            \resumeItem{Prevented invalid merchant payment attempts by designing MySQL schema constraints and validation logic to enforce capability prerequisites at checkout.}
-        \resumeItemListEnd
-    \resumeSubheading
-      {\textbf{Intact Financial Corporation}}{Jan 2025 -- Apr 2025}
-      {{AI Software Developer Intern, AI Accelerators}} {Montreal, QC}
+      {\textbf{Shopify}}{May 2025 - Now}
+      {{Software Engineering Intern}}{Toronto, ON}
       \resumeItemListStart
-        \resumeItem{Reduced manual claim-review volume 80\% by building a Flask triage API on AWS Bedrock that validates inputs, scores model confidence, and routes low-confidence cases to human review via configurable thresholds.}
-        \resumeItem{Accelerated GenAI experimentation process by building an internal Python SDK that unified LLM eval tooling behind a single interface \& adopted by 15 teams across Intact Labs.}
-        \resumeItem{Enabled MLflow observability for GenAI apps by building AWS Lambda ingestion that logs inference inputs/outputs, model/config metadata, and latency metrics for experiment tracking.}
+        \resumeItem{Payments Processing Foundations - Ruby on Rails, MySQL, GraphQL}
     \resumeItemListEnd
     \resumeSubheading
-      {\textbf{Royal Bank of Canada}}{May 2024 -- Jan 2025}
-      {{DevOps Engineer Intern, Platform Engineering}}{Toronto, ON}
+      {\textbf{Intact Financial Corporation}}{Jan 2025 - Apr 2025}
+      {{AI Software Developer Intern}}{Montreal, QC}
       \resumeItemListStart
-        \resumeItem{Developed Spring Boot services for deployment governance (policy evaluation + auditable logs), processing 100k+ Kafka events/day, persisted with MongoDB.}
-        \resumeItem{Standardized CI security gates across RBC by integrating Snyk Code scanning via a Python/Flask service and reusable TypeScript GitHub Actions, reducing critical vulnerabilities reaching production by 25\%.}
+        \resumeItem{Refactored Intact's Insurance Claims processing backend from regex-based to RAG-based, reducing manual claims reviewing efforts per claim by 80\% using Python, AWS Bedrock Flows + Knowledge Base.}
+        \resumeItem{Streamlined the RAG/LLM experimentation process for 2000+ Intact Labs developers by developing a tool to centralize LLM output evaluation and observability logs using Python, LangChain, Arize Phoenix, DeepEval.}
+        \resumeItem{Implemented customized observability for RAG/LLM applications by developing an AWS Lambda function that captures inferences, RAG retrieval and workflow configurations to AWS SageMaker MLflow.}
+        \resumeItem{\textbf{DataLab Hackathon}: Developed an AI transcription correction service, reducing errors by 20\% over the company baseline, chosen by a Director for potential production implementation}
+    \resumeItemListEnd
+        \resumeSubheading
+      {\textbf{Royal Bank of Canada}}{May 2024 - Jan 2025}
+      {{Software Developer Intern}}{Toronto, ON}
+      \resumeItemListStart
+        \resumeItem{Chosen as 1 of 10 from 310 Summer Interns based on term performance to participate in a round-table discussion with Head of RBC T\&O.}
+        \resumeItem{Improved mandated software compliance and audit time by 25\% across 70,000 repositories by developing an automated governance platform using Java, Spring Boot, MongoDB, Kafka.}
+        \resumeItem{Refactored authentication service by decoupling validation logic from policy definitions, enabling dynamic YAML-based policy selection per tool, enhancing modularity and scalability.}
+        % \resumeItem{Designed dynamic quality gate policies for development environments based on cloud providers and security scan and code quality scan results for all RBC T\&O repositories using Open Policy Agent}
+        \resumeItem{Reduced high-severity bugs found in production by 20\% across RBC T\&O by developing code scanning toolkit into the governance platform using TypeScript and Snyk APIs.}
+        \resumeItem{Improved triage processing time by implementing RESTful APIs with Python and Flask to sync vulnerability data from the code scanning toolkit to corresponding GitHub repositories' issues tab.}
     \resumeItemListEnd
     \resumeSubheading
-      {\textbf{Armonia}}{Feb 2024 -- May 2024}
-      {{Full-stack Engineer Intern}}{Montreal, QC}
+      {\textbf{Armonia}}{February 2024 -- May 2024}
+      {{Full-stack Engineer Intern} }{Montreal, QC}
       \resumeItemListStart
-        \resumeItem{Delivered an internal MVP in 8 weeks by building end-to-end workflows (Next.js/React/TypeScript/AWS S3) to replace outsourced development, saving ~\$2K/month in contractor spend.}
-        \resumeItem{MVP won 4th place in the Pierre-Peladeau entrepreneurial competition, winning \$25,000.}
+        \resumeItem{Won 4th place in the Pierre-Péladeau entrepreneurial competition against 50+ startups, winning \$25,000.}
+        \resumeItem{Led the core product refactor to Next.js, TypeScript, Express.js, PostgreSQL, eliminating contractor dependency}
+        \resumeItem{Reduced search API latency by refactoring back-end APIs into smaller, specialized endpoints and response caching for high-traffic endpoints using Redis.}
       \resumeItemListEnd
       
+% -----------Multiple Positions Heading-----------
+%    \resumeSubSubheading
+%     {Software Engineer I}{Oct 2014 - Sep 2016}
+%     \resumeItemListStart
+%        \resumeItem{Apache Beam}
+%          {Apache Beam is a unified model for defining both batch and streaming data-parallel processing pipelines}
+%     \resumeItemListEnd
+%    \resumeSubHeadingListEnd
+%-------------------------------------------
   \resumeSubHeadingListEnd
+
+
 %-----------PROJECTS-----------
 \section{Projects}
     \resumeSubHeadingListStart
         \resumeProjectHeading
-          {\textbf{AI Transcription Correction $|$} \normalfont\emph{Intact DataLab Hackathon 2nd place}}{}
+          {\textbf{Codebase Explorer} $|$ \normalfont\emph{\small Go, React.js, Next.js, TypeScript, Python, PostgreSQL}}{}
           \resumeItemListStart
-            \resumeItem{Developed an AI transcription-correction service that reduced word error rate (WER) by 20\% vs. the existing baseline; shortlisted by senior leadership for potential productionization at Intact.}\
-            \resumeItem{Improved transcript accuracy by detecting error-prone spans via perplexity scoring, chunking long sequences, and applying few-shot LLM edits with prompting + post-validation.}
+            \resumeItem{Developed a full-stack application that allows users to navigate complex codebases effectively by generating knowledge graphs from GitHub repositories}\
+            \resumeItem{Implemented code parsing algorithm in Go, extracting structural elements like files, classes, functions, and methods for effective graph visualization.}
+            \resumeItem{Designed and implemented a dynamic graph visualization using React and TypeScript, allowing users to interactively explore complex code structures.}
         \resumeItemListEnd
         % \resumeProjectHeading
-        %   {\textbf{Codebase Explorer} $|$ \normalfont\emph{\small Go, React.js, Next.js, TypeScript, Python, PostgreSQL}}{}
+        %   {\textbf{Real-time Transaction Visualization - ConUHacks2024 } $|$ \normalfont\emph{\small Next.js, TypeScript, tRPC, PostgreSQL, OpenAI API.}}{}
         %   \resumeItemListStart
-        %     \resumeItem{Developed a full-stack application that allows users to navigate complex codebases effectively by generating knowledge graphs from GitHub repositories.}\
-        %     \resumeItem{Implemented code parsing algorithm in Go, extracting structural elements like files, classes, functions, and methods for effective graph visualization.}
-        %     \resumeItem{Designed and implemented a dynamic graph visualization using React and TypeScript, allowing users to interactively explore complex code structures.}
-        % \resumeItemListEnd
-        \resumeProjectHeading
-          {\textbf{Gift Recommendation AI Agent $|$} \normalfont\emph{Python, FastAPI, React, TypeScript, OpenAI API}}{}
-          \resumeItemListStart
-            \resumeItem{Developed an agentic AI system to recommend gifts to users from their social media and multi-modal context.}
-            \resumeItem{Created a structured user-profile pipeline (interests, relationships, occasions) and a ranking step to produce top-N gift recommendations; exposed results via FastAPI endpoints consumed by a React UI.}
-          \resumeItemListEnd
+        %     \resumeItem{Ingested and Visualized in-real-time bank to exchanges transactions data sorted by individual stock or exchanges from a PostgreSQL database by plotting the average price of multiple symbols using plotly.js}
+        %     \resumeItem{Integrated OpenAI API to the database to display and automatically execute SQL commands from user prompts with database context using tRPC. Web-app built using Next.js, TypeScript, Tailwind, shadcn/ui}
+        %   \resumeItemListEnd  
         % \resumeProjectHeading
         %   {\textbf{Perplexity Clone} $|$ \normalfont\emph{\small Express, Next.js, TypeScript, Langchain, OpenAI, WebSockets}}{}
         %   \resumeItemListStart
@@ -201,10 +210,14 @@
 \section{Technical Skills}
  \begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
-     \textbf{Languages:}{ Ruby, Java, Python, TypeScript, JavaScript, Go, SQL, HTML, CSS} \\
-     \textbf{Frameworks/Libraries:}{ Ruby on Rails, GraphQL, Spring Boot, Flask, React, Next.js, GitHub Actions, MLflow} \\
-     \textbf{Databases \& Messaging:}{ MySQL, MongoDB, PostgreSQL, Kafka } \\
-     \textbf{Cloud/Infra:} AWS (Bedrock, Lambda, S3), Docker, Linux, Vercel \\
+     \textbf{Languages:}{ Java, Python, TypeScript/JavaScript, Go, Open Policy Agent, SQL, C++, C, PHP, HTML, CSS} \\
+     \textbf{Technologies:}{ Spring Boot, Flask, React, Next.js, Express.js, MongoDB, Docker, PostgreSQL, GitHub Actions, Kafka } \\
+     \textbf{Miscellaneous:}{ Linux, MacOS, Openshift Cloud Platform, JUnit, Mockito, Nginx, Docker, OpenShift } \\
     }}
  \end{itemize}
+
+
+%
+%-----------PROGRAMMING SKILLS-----------
+%-------------------------------------------
 \end{document}

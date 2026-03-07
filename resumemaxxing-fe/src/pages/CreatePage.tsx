@@ -7,16 +7,21 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { parseTexResume } from '@/utils/texParser'
-import { exportAsTex, exportAsMd, generateResumeHtml, printResumePdf, downloadFile } from '@/utils/profileExport'
+import {
+  exportAsTex, exportAsMd, generateResumeHtml, printResumePdf, downloadFile,
+  FONT_OPTIONS, DEFAULT_FORMAT,
+} from '@/utils/profileExport'
 import type {
   ProfileData, EducationEntry, ExperienceEntry, ProjectEntry, SkillsEntry, SectionType,
 } from '@/types/profile'
+import type { ResumeFormat } from '@/utils/profileExport'
 import { cn } from '@/lib/utils'
 
 // ─── storage ──────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'agentic-resume-profile'
 const SECTIONS_KEY = 'agentic-resume-sections'
+const FORMAT_KEY = 'agentic-resume-format'
 
 const DEFAULT_PROFILE: ProfileData = {
   contact: { name: '', phone: '', email: '', linkedin: '', github: '', portfolio: '' },
@@ -31,6 +36,11 @@ function loadProfile(): ProfileData {
 function loadSections(): SectionType[] {
   try { const s = localStorage.getItem(SECTIONS_KEY); return s ? JSON.parse(s) : [] }
   catch { return [] }
+}
+
+function loadFormat(): ResumeFormat {
+  try { const s = localStorage.getItem(FORMAT_KEY); return s ? { ...DEFAULT_FORMAT, ...JSON.parse(s) } : DEFAULT_FORMAT }
+  catch { return DEFAULT_FORMAT }
 }
 
 function sectionsFromData(data: ProfileData): SectionType[] {
@@ -388,6 +398,27 @@ const DropItem = ({ children, onClick }: { children: React.ReactNode; onClick: (
   </button>
 )
 
+// ─── format sidebar controls ──────────────────────────────────────────────────
+
+const FormatSlider = ({
+  label, value, min, max, step, unit, onChange,
+}: {
+  label: string; value: number; min: number; max: number; step: number; unit: string
+  onChange: (v: number) => void
+}) => (
+  <div className="flex flex-col gap-1">
+    <div className="flex justify-between items-baseline">
+      <span className="text-[11px] text-[#8aaac8] font-jetbrains">{label}</span>
+      <span className="text-[11px] text-[#c8d8f0] font-jetbrains tabular-nums">{value}{unit}</span>
+    </div>
+    <input
+      type="range" min={min} max={max} step={step} value={value}
+      onChange={e => onChange(parseFloat(e.target.value))}
+      className="w-full h-1 rounded-full appearance-none cursor-pointer bg-[#1a3050] accent-payne-gray"
+    />
+  </div>
+)
+
 // ─── resize handle ────────────────────────────────────────────────────────────
 
 const MIN_LEFT = 280
@@ -447,6 +478,8 @@ export default function CreatePage() {
   const [pdfImporting, setPdfImporting]     = useState(false)
   const [sidebarOpen, setSidebarOpen]       = useState(true)
   const [editMode, setEditMode]             = useState(false)
+  const [formatOpen, setFormatOpen]         = useState(false)
+  const [format, setFormat]                 = useState<ResumeFormat>(loadFormat)
   const [iframeEditing, setIframeEditing]   = useState(false)
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false)
   const [pdfPreviewHtml, setPdfPreviewHtml] = useState('')
@@ -482,15 +515,16 @@ export default function CreatePage() {
   }, [profile, draftEntry])
 
   // ── sync preview HTML — instant, no debounce ──
-  const [resumeHtml, setResumeHtml] = useState(() => generateResumeHtml(loadProfile()))
+  const [resumeHtml, setResumeHtml] = useState(() => generateResumeHtml(loadProfile(), undefined, { format: loadFormat() }))
   useEffect(() => {
-    const t = setTimeout(() => setResumeHtml(generateResumeHtml(previewProfile)), 120)
+    const t = setTimeout(() => setResumeHtml(generateResumeHtml(previewProfile, undefined, { format })), 120)
     return () => clearTimeout(t)
-  }, [previewProfile])
+  }, [previewProfile, format])
 
   // persist to localStorage
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)) }, [profile])
   useEffect(() => { localStorage.setItem(SECTIONS_KEY, JSON.stringify(sections)) }, [sections])
+  useEffect(() => { localStorage.setItem(FORMAT_KEY, JSON.stringify(format)) }, [format])
 
   const toggleExpand = (id: string) =>
     setExpandedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
@@ -509,10 +543,10 @@ export default function CreatePage() {
     // Don't re-render the iframe while the user is actively typing in it
     if (iframeEditing) return
     const t = setTimeout(() => {
-      setResumeHtmlFinal(generateResumeHtml(livePreviewProfile, undefined, { editable: editMode }))
+      setResumeHtmlFinal(generateResumeHtml(livePreviewProfile, undefined, { editable: editMode, format }))
     }, 120)
     return () => clearTimeout(t)
-  }, [livePreviewProfile, editMode, iframeEditing])
+  }, [livePreviewProfile, editMode, iframeEditing, format])
 
   // ── sections ──
   const addSection = (type: SectionType) => {
@@ -627,7 +661,7 @@ export default function CreatePage() {
   }
 
   const openPdfPreview = () => {
-    setPdfPreviewHtml(generateResumeHtml(livePreviewProfile))
+    setPdfPreviewHtml(generateResumeHtml(livePreviewProfile, undefined, { format }))
     setPdfPageCount(1)
     setPdfPreviewOpen(true)
   }
@@ -645,7 +679,7 @@ export default function CreatePage() {
   const handleExportTex = () => downloadFile(exportAsTex(profile), `${nameSlug}_resume.tex`, 'text/plain')
   const handleExportMd  = () => downloadFile(exportAsMd(profile),  `${nameSlug}_resume.md`,  'text/markdown')
   // Always print the clean (non-editable) version
-  const handlePrint = () => printResumePdf(generateResumeHtml(livePreviewProfile))
+  const handlePrint = () => printResumePdf(generateResumeHtml(livePreviewProfile, undefined, { format }))
 
   // iframe auto-height + page count tracking
   useEffect(() => {
@@ -1074,8 +1108,14 @@ export default function CreatePage() {
               <DropItem onClick={handleExportTex}><FileText size={12} className="text-payne-gray" /> download .tex</DropItem>
               <DropItem onClick={handleExportMd}><FileText size={12} className="text-payne-gray" /> download .md</DropItem>
             </DropdownBtn>
-            <PillBtn variant={editMode ? 'accent' : 'default'} onClick={() => { setEditMode(m => !m); setIframeEditing(false) }}>
-              <SquarePen size={11} /> {editMode ? 'editing' : 'edit'}
+            <PillBtn variant={editMode ? 'accent' : 'default'} onClick={() => {
+              const next = !editMode
+              setEditMode(next)
+              setIframeEditing(false)
+              if (next) { setSidebarOpen(false); setFormatOpen(true) }
+              else { setFormatOpen(false) }
+            }}>
+              <SquarePen size={11} /> {editMode ? 'editing' : 'edit in preview'}
             </PillBtn>
             <PillBtn variant="default" onClick={openPdfPreview}>
               <Printer size={11} /> PDF preview
@@ -1083,17 +1123,100 @@ export default function CreatePage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-[820px] mx-auto shadow-2xl rounded overflow-hidden">
-            <iframe
-              ref={iframeRef}
-              srcDoc={resumeHtmlFinal}
-              title="Resume Preview"
-              sandbox={editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
-              className={cn('w-full border-0 bg-white', editMode && 'cursor-pointer')}
-              style={{ minHeight: '1056px' }}
-            />
+        <div className="flex flex-1 overflow-hidden">
+          {/* preview scroll area */}
+          <div className="flex-1 overflow-y-auto p-6 min-w-0">
+            <div className="max-w-[820px] mx-auto shadow-2xl rounded overflow-hidden">
+              <iframe
+                ref={iframeRef}
+                srcDoc={resumeHtmlFinal}
+                title="Resume Preview"
+                sandbox={editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
+                className={cn('w-full border-0 bg-white', editMode && 'cursor-pointer')}
+                style={{ minHeight: '1056px' }}
+              />
+            </div>
           </div>
+
+          {/* ── FORMAT SIDEBAR ── */}
+          <AnimatePresence>
+            {formatOpen && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 272, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="shrink-0 border-l border-[#0d1a2e] bg-[#060e20] overflow-hidden flex flex-col"
+                style={{ width: 272 }}
+              >
+                <div className="overflow-y-auto flex-1 px-4 py-4 flex flex-col gap-5">
+                  {/* header */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-jetbrains text-payne-gray tracking-widest">// format</span>
+                    <button onClick={() => { setFormatOpen(false); setEditMode(false) }}
+                      className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer">
+                      <X size={13} />
+                    </button>
+                  </div>
+
+                  {/* typography */}
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[10px] text-[#4a7090] font-jetbrains tracking-widest uppercase">typography</span>
+
+                    {/* font family */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] text-[#8aaac8] font-jetbrains">font</span>
+                      <select
+                        value={format.fontFamily}
+                        onChange={e => setFormat(f => ({ ...f, fontFamily: e.target.value }))}
+                        className="w-full bg-[#08132a] border border-[#1a3050] text-[#c8d8f0] text-[11px] font-jetbrains rounded-lg px-2.5 py-1.5 cursor-pointer focus:outline-none focus:border-payne-gray appearance-none"
+                      >
+                        {(['monospace', 'serif', 'sans-serif'] as const).map(cat => (
+                          <optgroup key={cat} label={cat}>
+                            {FONT_OPTIONS.filter(o => o.category === cat).map(o => (
+                              <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+
+                    <FormatSlider label="body size" value={format.fontSize} min={8} max={12} step={0.5} unit="pt"
+                      onChange={v => setFormat(f => ({ ...f, fontSize: v }))} />
+                    <FormatSlider label="name size" value={format.nameSize} min={14} max={28} step={1} unit="pt"
+                      onChange={v => setFormat(f => ({ ...f, nameSize: v }))} />
+                    <FormatSlider label="bullet size" value={format.bulletSize} min={7} max={11} step={0.5} unit="pt"
+                      onChange={v => setFormat(f => ({ ...f, bulletSize: v }))} />
+                    <FormatSlider label="line height" value={format.lineHeight} min={1.1} max={1.8} step={0.05} unit=""
+                      onChange={v => setFormat(f => ({ ...f, lineHeight: v }))} />
+                  </div>
+
+                  <div className="h-px bg-[#0d1a2e]" />
+
+                  {/* layout */}
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[10px] text-[#4a7090] font-jetbrains tracking-widest uppercase">layout</span>
+                    <FormatSlider label="page margin" value={format.pageMargin} min={0.3} max={0.8} step={0.05} unit="in"
+                      onChange={v => setFormat(f => ({ ...f, pageMargin: v }))} />
+                    <FormatSlider label="section gap" value={format.sectionSpacing} min={4} max={20} step={1} unit="px"
+                      onChange={v => setFormat(f => ({ ...f, sectionSpacing: v }))} />
+                    <FormatSlider label="entry gap" value={format.entrySpacing} min={2} max={12} step={1} unit="px"
+                      onChange={v => setFormat(f => ({ ...f, entrySpacing: v }))} />
+                  </div>
+
+                  <div className="h-px bg-[#0d1a2e]" />
+
+                  {/* reset */}
+                  <button
+                    onClick={() => setFormat(DEFAULT_FORMAT)}
+                    className="text-[11px] font-jetbrains text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer text-left"
+                  >
+                    // reset to defaults
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -1103,7 +1226,7 @@ export default function CreatePage() {
           {/* toolbar */}
           <div className="sticky top-0 z-10 w-full max-w-[880px] flex items-center justify-between px-4 py-2.5 bg-[#030b18] border border-[#1a3050] rounded-xl mb-5 shadow-xl">
             <div className="flex items-center gap-3 text-xs">
-              <Printer size={13} className="text-[#456677]" />
+              <Printer size={13} className="text-payne-gray" />
               <span className="text-[#c8d8f0]">PDF Preview</span>
               <span className={cn('font-jetbrains', pdfPageCount > 1 ? 'text-[#ef4444]' : 'text-[#4ade80]')}>
                 {pdfPageCount > 1 ? `⚠ ${pdfPageCount} pages` : '✓ 1 page'}
