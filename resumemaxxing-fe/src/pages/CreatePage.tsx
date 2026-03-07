@@ -700,7 +700,13 @@ export default function CreatePage() {
       if (e.data?.type !== 'resume-input') return
       setIframeEditing(false)
       const { rf, rs, rid, rbi, value } = e.data
-      setProfile(p => applyFieldEdit(p, rs, rid ?? null, rf, rbi ?? null, value))
+      // Sanitize innerHTML from contenteditable: keep only safe inline tags, strip the rest
+      const sanitized = (value as string)
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<(?!\/?(?:b|i|u|strong|em)\b)[^>]*>/gi, '')
+        .replace(/&nbsp;/gi, ' ')
+        .trim()
+      setProfile(p => applyFieldEdit(p, rs, rid ?? null, rf, rbi ?? null, sanitized))
     }
     window.addEventListener('message', handler)
     return () => window.removeEventListener('message', handler)

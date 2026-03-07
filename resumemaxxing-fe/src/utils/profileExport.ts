@@ -325,7 +325,25 @@ function makeResumeCss(fmt: ResumeFormat): string {
   //   \small = fontSize*(10/11)   \large = fontSize*(12/11)   \Huge = fontSize*(24.88/11)
   const smallPt  = (fmt.fontSize * 10 / 11).toFixed(2)  // \small
   const largePt  = (fmt.fontSize * 12 / 11).toFixed(2)  // \large  (section titles)
-  return `${fontImport}
+
+  // For Computer Modern Serif: load the actual small-caps face (cmunsc.woff) so
+  // the browser uses real glyphs rather than synthesizing uppercase-only fake small-caps.
+  // In LaTeX, \textbf{\Huge \scshape Name} uses cmcsc (regular-weight SC face) because
+  // CM has no bold-SC variant — so h1 is rendered at normal weight with SC glyphs.
+  const isCMSerif = fmt.fontFamily.includes('Computer Modern Serif') && !fmt.fontFamily.includes('Sans')
+  const cmScFontFace = isCMSerif ? `
+@font-face {
+  font-family: 'Computer Modern Serif SC';
+  src: url('https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/font/Serif/cmunsc.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}` : ''
+  const h1FontFamily = isCMSerif
+    ? "'Computer Modern Serif SC', 'Computer Modern Serif', serif"
+    : fmt.fontFamily
+  const h1FontWeight = isCMSerif ? 'normal' : '700'
+
+  return `${fontImport}${cmScFontFace}
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   @page { size: letter; margin: ${m}in; }
@@ -348,13 +366,14 @@ function makeResumeCss(fmt: ResumeFormat): string {
   /*
    * Header:  \textbf{\Huge \scshape Name} \\ \vspace{1pt} \small contact
    * \Huge at 11pt class = 24.88pt (nameSize default = 25)
+   * CM has no bold-SC face → LaTeX falls back to regular-weight SC (cmunsc.woff)
    * No extra letter-spacing — \scshape does not add tracking in LaTeX
    */
   .hdr { text-align: center; margin-bottom: 12px; }
   .hdr h1 {
     font-size: ${fmt.nameSize}pt;
-    font-weight: 700;
-    font-variant: small-caps;
+    font-weight: ${h1FontWeight};
+    font-family: ${h1FontFamily};
     /* no letter-spacing: LaTeX \scshape adds none */
   }
   /* \small contact line, \vspace{1pt} gap */
@@ -370,8 +389,8 @@ function makeResumeCss(fmt: ResumeFormat): string {
   section { margin-bottom: ${fmt.sectionSpacing}px; }
   .sec-title {
     font-size: ${largePt}pt;
-    font-weight: 400;
-    font-variant: small-caps;
+    font-weight: ${isCMSerif ? 'normal' : '600'};
+    font-family: ${isCMSerif ? "'Computer Modern Serif SC', 'Computer Modern Serif', serif" : fmt.fontFamily};
     /* no letter-spacing */
     border-bottom: 0.4pt solid #000;
     padding-bottom: 0;
@@ -423,7 +442,7 @@ function makeResumeCss(fmt: ResumeFormat): string {
    * \begin{itemize} default: leftmargin ~2.5em at \small size
    */
   .bullets { margin-top: 1px; padding-left: 1.5em; }
-  .bullets li { font-size: ${smallPt}pt; margin-bottom: 0; list-style-type: disc; line-height: ${fmt.lineHeight}; }
+  .bullets li { font-size: ${fmt.bulletSize}pt; margin-bottom: 0; list-style-type: disc; line-height: ${fmt.lineHeight}; }
   .rawtext {
     font-size: ${smallPt}pt; color: #555; font-style: italic;
     margin-top: 2px; padding-left: 8px; border-left: 2px solid #ccc;
@@ -448,6 +467,15 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
+/**
+ * Like esc() but allows whitelisted inline formatting tags (<b>, <i>, <u>, <strong>, <em>).
+ * Use for text content fields that may contain user-applied bold/italic from contenteditable.
+ */
+function safeHtml(s: string): string {
+  const escaped = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return escaped.replace(/&lt;(\/?)(b|i|u|strong|em)&gt;/gi, '<$1$2>')
+}
+
 export function generateResumeHtml(
   profile: ProfileData,
   selection?: ExportSelection,
@@ -469,20 +497,20 @@ export function generateResumeHtml(
   const skillEntries = profile.skills.filter(e     => !selection || selection.skills.includes(e.id))
 
   const contactParts: string[] = []
-  if (c.phone)     contactParts.push(`<span${at('phone', 'contact')}>${esc(c.phone)}</span>`)
-  if (c.email)     contactParts.push(`<a href="mailto:${esc(c.email)}"${at('email', 'contact')}>${esc(c.email)}</a>`)
-  if (c.linkedin)  contactParts.push(`<a href="https://linkedin.com/in/${esc(c.linkedin)}"${at('linkedin', 'contact')}>linkedin.com/in/${esc(c.linkedin)}</a>`)
-  if (c.github)    contactParts.push(`<a href="https://github.com/${esc(c.github)}"${at('github', 'contact')}>github.com/${esc(c.github)}</a>`)
-  if (c.portfolio) contactParts.push(`<a href="${esc(c.portfolio)}"${at('portfolio', 'contact')}>${esc(c.portfolio)}</a>`)
+  if (c.phone)     contactParts.push(`<span${at('phone', 'contact')}>${safeHtml(c.phone)}</span>`)
+  if (c.email)     contactParts.push(`<a href="mailto:${esc(c.email)}"${at('email', 'contact')}>${safeHtml(c.email)}</a>`)
+  if (c.linkedin)  contactParts.push(`<a href="https://linkedin.com/in/${esc(c.linkedin)}"${at('linkedin', 'contact')}>linkedin.com/in/${safeHtml(c.linkedin)}</a>`)
+  if (c.github)    contactParts.push(`<a href="https://github.com/${esc(c.github)}"${at('github', 'contact')}>github.com/${safeHtml(c.github)}</a>`)
+  if (c.portfolio) contactParts.push(`<a href="${esc(c.portfolio)}"${at('portfolio', 'contact')}>${safeHtml(c.portfolio)}</a>`)
 
   const sec = (title: string, body: string) =>
     `<section><div class="sec-title">${title}</div>${body}</section>`
 
   const blist = (bs: string[], raw: string, section: string, id: string) => {
     if (bs.length > 0)
-      return `<ul class="bullets">${bs.map((b, i) => `<li${at('bullet', section, id, i)}>${esc(b)}</li>`).join('')}</ul>`
+      return `<ul class="bullets">${bs.map((b, i) => `<li${at('bullet', section, id, i)}>${safeHtml(b)}</li>`).join('')}</ul>`
     if (raw)
-      return `<div class="rawtext">${esc(raw)}</div>`
+      return `<div class="rawtext">${safeHtml(raw)}</div>`
     return ''
   }
   // Education: \resumeSubheading{school}{location}{degree}{dates}
@@ -491,14 +519,14 @@ export function generateResumeHtml(
   const eduHtml = eduEntries.length === 0 ? '' : sec('Education', `<div class="entries">${eduEntries.map(e => `
     <div class="entry">
       <div class="row">
-        <span class="org"${at('school', 'education', e.id)}>${esc(e.school)}</span>
-        <span class="r1"${at('location', 'education', e.id)}>${esc(e.location)}</span>
+        <span class="org"${at('school', 'education', e.id)}>${safeHtml(e.school)}</span>
+        <span class="r1"${at('location', 'education', e.id)}>${safeHtml(e.location)}</span>
       </div>
       <div class="row sub">
-        <span${at('degree', 'education', e.id)}>${esc(e.degree)}</span>
-        <span${at('dates', 'education', e.id)}>${esc(e.dates)}</span>
+        <span${at('degree', 'education', e.id)}>${safeHtml(e.degree)}</span>
+        <span${at('dates', 'education', e.id)}>${safeHtml(e.dates)}</span>
       </div>
-      ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> <span${at('coursework', 'education', e.id)}>${esc(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</span></div>` : ''}
+      ${e.coursework ? `<div class="cw"><b>Relevant Coursework:</b> <span${at('coursework', 'education', e.id)}>${safeHtml(e.coursework.replace(/^Relevant Coursework:\s*/i, ''))}</span></div>` : ''}
     </div>`).join('')}</div>`)
 
   // Experience: \resumeSubheading{company}{dates}{role}{location}
@@ -507,12 +535,12 @@ export function generateResumeHtml(
   const expHtml = expEntries.length === 0 ? '' : sec('Experience', `<div class="entries">${expEntries.map(e => `
     <div class="entry">
       <div class="row">
-        <span class="org"${at('company', 'experience', e.id)}>${esc(e.company)}</span>
-        <span class="r1"${at('dates', 'experience', e.id)}>${esc(e.dates)}</span>
+        <span class="org"${at('company', 'experience', e.id)}>${safeHtml(e.company)}</span>
+        <span class="r1"${at('dates', 'experience', e.id)}>${safeHtml(e.dates)}</span>
       </div>
       <div class="row sub">
-        <span${at('role', 'experience', e.id)}>${esc(e.role)}</span>
-        <span${at('location', 'experience', e.id)}>${esc(e.location)}</span>
+        <span${at('role', 'experience', e.id)}>${safeHtml(e.role)}</span>
+        <span${at('location', 'experience', e.id)}>${safeHtml(e.location)}</span>
       </div>
       ${blist(e.bullets, e.rawText, 'experience', e.id)}
     </div>`).join('')}</div>`)
@@ -522,8 +550,8 @@ export function generateResumeHtml(
   const projHtml = projEntries.length === 0 ? '' : sec('Projects', `<div class="entries">${projEntries.map(e => `
     <div class="entry">
       <div class="row proj-row">
-        <span class="org"${at('name', 'projects', e.id)}>${esc(e.name)}${e.techStack ? ` <span style="font-weight:400;font-style:italic"${at('techStack', 'projects', e.id)}>| ${esc(e.techStack)}</span>` : ''}</span>
-        <span class="r1"${at('dates', 'projects', e.id)}>${esc(e.dates)}</span>
+        <span class="org"${at('name', 'projects', e.id)}>${safeHtml(e.name)}${e.techStack ? ` <span style="font-weight:400;font-style:italic"${at('techStack', 'projects', e.id)}>| ${safeHtml(e.techStack)}</span>` : ''}</span>
+        <span class="r1"${at('dates', 'projects', e.id)}>${safeHtml(e.dates)}</span>
       </div>
       ${blist(e.bullets, e.rawText, 'projects', e.id)}
     </div>`).join('')}</div>`)
@@ -531,7 +559,7 @@ export function generateResumeHtml(
   // Skills: \begin{itemize}[leftmargin=0.15in,label={}] \small \textbf{cat}: techs
   const skillHtml = skillEntries.length === 0 ? '' : sec('Technical Skills', `<div class="sk-list">${
     skillEntries.map(e =>
-      `<div class="sk-row"><span class="sk-cat"${at('category', 'skills', e.id)}>${esc(e.category)}:</span> <span${at('technologies', 'skills', e.id)}>${esc(e.technologies)}</span></div>`
+      `<div class="sk-row"><span class="sk-cat"${at('category', 'skills', e.id)}>${safeHtml(e.category)}:</span> <span${at('technologies', 'skills', e.id)}>${safeHtml(e.technologies)}</span></div>`
     ).join('')}</div>`)
 
   const resumeCss = makeResumeCss(fmt)
@@ -549,7 +577,7 @@ export function generateResumeHtml(
   document.addEventListener('focusout',function(e){
     var el=e.target.closest('[data-rf]');
     if(!el)return;
-    window.parent.postMessage({type:'resume-input',rf:el.dataset.rf,rs:el.dataset.rs,rid:el.dataset.rid||null,rbi:el.dataset.rbi!=null?+el.dataset.rbi:null,value:el.innerText.trim()},'*');
+    window.parent.postMessage({type:'resume-input',rf:el.dataset.rf,rs:el.dataset.rs,rid:el.dataset.rid||null,rbi:el.dataset.rbi!=null?+el.dataset.rbi:null,value:el.innerHTML.trim()},'*');
   });
   document.addEventListener('keydown',function(e){
     if(e.key==='Enter'){var el=e.target.closest('[data-rf]');if(el){e.preventDefault();el.blur();}}
@@ -565,7 +593,7 @@ export function generateResumeHtml(
 </head>
 <body>
   <div class="hdr">
-    <h1${at('name', 'contact')}>${esc(c.name || 'Your Name')}</h1>
+    <h1${at('name', 'contact')}>${safeHtml(c.name || 'Your Name')}</h1>
     <div class="contact">${contactParts.join('<span class="sep">|</span>')}</div>
   </div>
   ${eduHtml}${expHtml}${projHtml}${skillHtml}
