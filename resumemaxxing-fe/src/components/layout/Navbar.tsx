@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router'
-import MelleonLogo from '@/components/icons/MelleonLogo'
+import MikuLogo from '@/components/icons/MikuLogo'
 import BlurredButton from '@/components/ui/blurred-button'
 import { cn } from '@/lib/utils'
 
@@ -17,7 +17,7 @@ const Navbar = () => {
 
         {/* Logo + wordmark */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <MelleonLogo size={28} />
+          <MikuLogo size={42} />
           <span className="font-jetbrains text-sm font-semibold text-[#c8d8f0] group-hover:text-white transition-colors tracking-tight">
             i love AI
           </span>
