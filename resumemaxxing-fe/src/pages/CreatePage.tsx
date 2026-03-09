@@ -1088,7 +1088,7 @@ export default function CreatePage() {
               {Array.from({ length: pageCount }, (_, i) => (
                 <div
                   key={i}
-                  className="w-full shadow-2xl rounded overflow-hidden flex-shrink-0 bg-white"
+                  className="w-full shadow-2xl rounded overflow-hidden shrink-0 bg-white"
                   style={{ height: 1056 }}
                 >
                   <iframe

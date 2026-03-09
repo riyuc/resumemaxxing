@@ -13,7 +13,6 @@ import type {
   ProfileData, EducationEntry, ExperienceEntry, ProjectEntry, SkillsEntry, SectionType,
 } from '@/types/profile'
 import { cn } from '@/lib/utils'
-import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import PillBtn from '@/components/ui/pill-btn'
 import EditableBullets from '@/components/ui/editable-bullets'
 import EntryCard from '@/components/ui/entry-card'

@@ -18,8 +18,8 @@ const HeroSection = () => {
           <span className="text-[#6a8aaa]">AI</span>
           <span className="text-[#8aaac8]">god</span>
           <span className="text-[#c8d8f0] font-bold">pls</span>
-          <span className="text-[#456677]">--help</span>
-          <span className="text-[#456677]">--me</span>
+          <span className="text-payne-gray">--help</span>
+          <span className="text-payne-gray">--me</span>
         </div>
         <div className="flex flex-col gap-0.5 pl-4 border-l border-[#1a3050] text-xs">
           <p className="text-[#4a7090]">&gt; prayer received!</p>
@@ -42,18 +42,18 @@ const HeroSection = () => {
       <motion.div {...fade(0.4)} className="flex flex-col gap-3">
         <p className="text-[#4a7090] text-xs tracking-widest">WHAT IT DOES</p>
         <div className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
-          <span className="text-[#456677]">tailor</span>
+          <span className="text-payne-gray">tailor</span>
           <span className="text-[#8aaac8]">fit your resume to any JD, in seconds</span>
-          <span className="text-[#456677]">layouts</span>
+          <span className="text-payne-gray">layouts</span>
           <span className="text-[#8aaac8]">easily adjust formatting like it's google docs.</span>
-          <span className="text-[#456677]">memory</span>
+          <span className="text-payne-gray">memory</span>
           <span className="text-[#8aaac8]">
             set up once — reuse forever, no subscriptions
             <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-1 text-[#6a8aaa] italic cursor-default">
               (not everything has to be a saas...)
             </span> 
           </span>
-          <span className="text-[#456677]">experiment</span>
+          <span className="text-payne-gray">experiment</span>
           <span className="text-[#8aaac8]">test resume advice from the internet instantly</span>
         </div>
       </motion.div>
