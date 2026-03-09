@@ -84,9 +84,9 @@ import OTPEmail from './emails/otp'
 import nodemailer from 'nodemailer'
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gehenna.sh',
-  port: 465,
-  auth: { user: 'makoto', pass: '12345678' }
+  host: 'example',
+  port: 000,
+  auth: { user: 'example', pass: 'example' }
 })
 
 .get('/otp', async ({ body }) => {
