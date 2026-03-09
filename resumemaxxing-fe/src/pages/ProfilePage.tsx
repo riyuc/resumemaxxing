@@ -532,7 +532,7 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto px-6 w-full pb-24">
 
         {/* ── page header ── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-[#4a7090] text-xs">
             <TerminalSquare size={14} className="text-payne-gray" />
             <span className="text-payne-gray">~/</span>
@@ -578,6 +578,11 @@ export default function ProfilePage() {
             <input ref={fileRef} type="file" accept=".tex" className="hidden" onChange={handleTexImport} />
             <input ref={pdfFileRef} type="file" accept=".pdf" className="hidden" onChange={handlePdfImport} />
           </div>
+        </div>
+
+        <div className='my-4 flex font-jetbrains text-xs'>
+          Add all the context to this profile (doesn't need to be curated), 
+          agentic flow will take context from here to generate your resume.
         </div>
 
         {/* ── contact section ── */}
