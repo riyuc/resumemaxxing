@@ -15,7 +15,7 @@ const HeroSection = () => {
       <div className="flex flex-col gap-1">
         <motion.div {...fade(0)} className="flex items-center gap-2 text-[#4a7090] text-xs mb-3">
           <span>$</span>
-          <span className="text-[#c8d8f0]">melleon --help</span>
+          <span className="text-[#c8d8f0]">AI god pls --help --me</span>
         </motion.div>
 
         <motion.h1 {...fade(0.1)} className="text-3xl md:text-4xl font-bold text-[#e8f0fc] tracking-tight leading-tight">
@@ -30,40 +30,40 @@ const HeroSection = () => {
       <motion.div {...fade(0.35)} className="flex flex-col gap-6 text-sm">
 
         <div className="flex flex-col gap-2">
-          <p className="text-[#4a7090] text-xs">// why I built this:</p>
+          <p className="text-[#4a7090] text-xs"> &gt;&gt; why I built this:</p>
           <p className="text-[#c8d8f0]">
             tl;dr — all the other resume builders sucked
-            <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-1 text-[#6a8aaa] italic cursor-default">
+            <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-3 text-[#6a8aaa] italic cursor-default">
               (yeah I said it)
             </span>
           </p>
-          <div className="flex flex-col gap-1 pl-4 border-l border-[#1a3050] text-[#8aaac8]">
-            <p>— none of the AI tools had what I wanted</p>
+          <div className="flex flex-col gap-1.5 pl-4 border-l border-[#1a3050] text-[#8aaac8]">
+            <p>— they all looked like someone prompted once and push it out there</p>
             <p>— wtf am I paying for? <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-1 text-[#6a8aaa] italic cursor-default">
               (not everything has to be a saas...)
             </span></p>
-            <p>— why can't I just set up once &amp; use it forever?</p>
+            <p>— why can't I just set up once use it forever?</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-[#4a7090] text-xs">// I noticed only 3 things in recruiting season:</p>
-          <div className="flex flex-col gap-2 pl-4 border-l border-[#1a3050] text-[#8aaac8]">
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[#c8d8f0]">[1]  I have a resume,</p>
-              <p className="pl-6">→ and I want to tweak it to fit a specific JD 
-                <span className="blur-sm hover:blur-none transition-all duration-300 ml-1 text-[#4a7090] text-xs cursor-default">
-                  without losing my mind
+        <div className="flex flex-col gap-3">
+          <p className="text-[#4a7090] text-xs">&gt;&gt; I only do 3 things in recruiting season:</p>
+          <div className="flex flex-col gap-3 pl-4 border-l border-[#1a3050] text-[#8aaac8]">
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[#c8d8f0]">1&#41;  I have a resume,</p>
+              <p className="pl-6">— and I want to tweak it to fit a specific JD
+                <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-1 text-[#6a8aaa] italic cursor-default">
+                (some has it but they sucked...)
                 </span>
               </p>
-              <p className="pl-6">→ or try a completely different layout</p>
+              <p className="pl-6">— or try a completely different layout</p>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[#c8d8f0]">[2]  I want to experiment,</p>
-              <p className="pl-6">→ when I see interesting resume advice online</p>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[#c8d8f0]">2&#41;  I want to experiment,</p>
+              <p className="pl-6">— when I see interesting resume advice online</p>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[#c8d8f0]">[3]  I don't want to start from scratch every time</p>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[#c8d8f0]">3&#41;  I don't want to start from scratch every time</p>
             </div>
           </div>
         </div>
