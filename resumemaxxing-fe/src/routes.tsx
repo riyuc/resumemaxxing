@@ -8,7 +8,7 @@
  * - Implement code splitting with lazy loading
  */
 
-import { RouteObject } from 'react-router'
+import type { RouteObject } from 'react-router'
 import AppLayout from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage'
