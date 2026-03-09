@@ -19,7 +19,7 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-2.5 group">
           <MelleonLogo size={28} />
           <span className="font-jetbrains text-sm font-semibold text-[#c8d8f0] group-hover:text-white transition-colors tracking-tight">
-            melleon
+            i love AI
           </span>
         </Link>
 
@@ -46,12 +46,12 @@ const Navbar = () => {
 
         {/* Auth */}
         <div className="flex items-center gap-1.5">
-          <Link
+          {/* <Link
             to="/login"
             className="px-3 py-1.5 text-xs font-jetbrains text-[#6a8aaa] hover:text-[#c8d8f0] transition-colors rounded-md hover:bg-[#0a1525]"
           >
             log in
-          </Link>
+          </Link> */}
           <BlurredButton href="/create" className="text-xs py-1.5 px-4">
             start building ↗
           </BlurredButton>

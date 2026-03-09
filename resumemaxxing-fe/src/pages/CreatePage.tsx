@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   Plus, X, Trash2, Pencil, Check, GraduationCap, Briefcase,
   Code2, Wrench, User, ChevronDown, ChevronRight, ChevronLeft, Upload, TerminalSquare,
-  Download, FileText, Printer, ChevronUp, PanelLeftOpen,
+  Download, FileText, Printer, PanelLeftOpen,
   SquarePen,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -16,6 +16,7 @@ import type {
 } from '@/types/profile'
 import type { ResumeFormat } from '@/utils/profileExport'
 import { cn } from '@/lib/utils'
+import { DropdownBtn, DropItem } from '@/components/ui/dropdown-btn'
 
 // ─── storage ──────────────────────────────────────────────────────────────────
 
@@ -349,55 +350,6 @@ const EntryCard = ({ children, onEdit, onDelete, expanded, onToggle, isEditing }
   </div>
 )
 
-// ─── dropdown button ──────────────────────────────────────────────────────────
-
-const DropdownBtn = ({ label, icon, children, align = 'right' }: {
-  label: string; icon?: React.ReactNode; children: React.ReactNode; align?: 'left' | 'right';
-}) => {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  return (
-    <div ref={ref} className="relative">
-      <PillBtn variant="default" onClick={() => setOpen(o => !o)}>
-        {icon}{label}{open ? <ChevronUp size={9} /> : <ChevronDown size={9} />}
-      </PillBtn>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.97 }}
-            transition={{ duration: 0.12 }}
-            className={cn(
-              'absolute top-full mt-1.5 z-30 bg-[#08132a] border border-[#1a3050] rounded-xl overflow-hidden shadow-xl min-w-[140px]',
-              align === 'right' ? 'right-0' : 'left-0',
-            )}
-            onClick={() => setOpen(false)}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-const DropItem = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
-  <button onClick={onClick}
-    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-[#94a3b8] hover:bg-[#0c1a38] hover:text-porcelain transition-colors cursor-pointer font-jetbrains text-left">
-    {children}
-  </button>
-)
-
 // ─── format sidebar controls ──────────────────────────────────────────────────
 
 const FormatSlider = ({
@@ -686,7 +638,7 @@ export default function CreatePage() {
     const iframe = iframeRef.current; if (!iframe) return
     const resize = () => {
       const h = iframe.contentDocument?.body?.scrollHeight
-      if (h) { iframe.style.height = `${h + 32}px`; setContentHeight(h) }
+      if (h) { setContentHeight(h) }
     }
     iframe.addEventListener('load', resize)
     return () => iframe.removeEventListener('load', resize)
@@ -1105,8 +1057,8 @@ export default function CreatePage() {
             <span className="text-payne-gray">~/</span>
             <span className="text-[#c8d8f0]">preview</span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse ml-1" title="live" />
-            <span className={cn('text-[11px] font-jetbrains ml-1', pageCount > 1 ? 'text-[#ef4444]' : 'text-[#4a7090]')}>
-              {pageCount > 1 ? `⚠ ${pageCount} pages` : '1 page'}
+            <span className="text-[11px] font-jetbrains ml-1 text-[#4a7090]">
+              {pageCount} {pageCount === 1 ? 'page' : 'pages'}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -1131,16 +1083,28 @@ export default function CreatePage() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* preview scroll area */}
-          <div className="flex-1 overflow-y-auto p-6 min-w-0">
-            <div className="max-w-[820px] mx-auto shadow-2xl rounded overflow-hidden">
-              <iframe
-                ref={iframeRef}
-                srcDoc={resumeHtmlFinal}
-                title="Resume Preview"
-                sandbox={editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
-                className={cn('w-full border-0 bg-white', editMode && 'cursor-pointer')}
-                style={{ minHeight: '1056px' }}
-              />
+          <div className="flex-1 overflow-y-auto p-6 min-w-0 bg-[#030b18]">
+            <div className="flex flex-col items-center gap-6 max-w-[820px] mx-auto pb-6">
+              {Array.from({ length: pageCount }, (_, i) => (
+                <div
+                  key={i}
+                  className="w-full shadow-2xl rounded overflow-hidden flex-shrink-0 bg-white"
+                  style={{ height: 1056 }}
+                >
+                  <iframe
+                    ref={i === 0 ? iframeRef : undefined}
+                    srcDoc={resumeHtmlFinal}
+                    title={`Resume Page ${i + 1}`}
+                    sandbox={i === 0 && editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
+                    className={cn('w-full border-0 bg-white block', i === 0 && editMode && 'cursor-pointer')}
+                    style={{
+                      height: Math.max(contentHeight || 1056, 1056),
+                      transform: `translateY(-${i * 1056}px)`,
+                      marginBottom: `-${i * 1056}px`,
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 

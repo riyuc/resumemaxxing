@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Plus, X, Trash2, Pencil, Check, GraduationCap, Briefcase,
-  Code2, Wrench, User, ChevronDown, ChevronRight, Upload, TerminalSquare, Download,
+  Code2, Wrench, User, Upload, TerminalSquare, Download,
   FileText,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
@@ -13,6 +13,11 @@ import type {
   ProfileData, EducationEntry, ExperienceEntry, ProjectEntry, SkillsEntry, SectionType,
 } from '@/types/profile'
 import { cn } from '@/lib/utils'
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import PillBtn from '@/components/ui/pill-btn'
+import EditableBullets from '@/components/ui/editable-bullets'
+import EntryCard from '@/components/ui/entry-card'
+import { DropdownBtn, DropItem } from '@/components/ui/dropdown-btn'
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -91,45 +96,6 @@ const Field = ({
         )}
       />
     )}
-  </div>
-)
-
-const PillBtn = ({
-  children, onClick, variant = 'default', className, type = 'button',
-}: {
-  children: React.ReactNode; onClick?: () => void;
-  variant?: 'default' | 'ghost' | 'danger' | 'accent';
-  className?: string; type?: 'button' | 'submit';
-}) => (
-  <button
-    type={type}
-    onClick={onClick}
-    className={cn(
-      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-jetbrains',
-      'transition-all duration-150 cursor-pointer select-none',
-      variant === 'default' && 'border border-payne-gray text-[#94a3b8] hover:border-[#6a8fa3] hover:text-porcelain',
-      variant === 'accent'  && 'bg-payne-gray text-white hover:bg-[#5a7d91]',
-      variant === 'ghost'   && 'text-payne-gray hover:text-porcelain',
-      variant === 'danger'  && 'text-[#ef4444]/60 hover:text-[#ef4444]',
-      className,
-    )}
-  >
-    {children}
-  </button>
-)
-
-// ─── bullet reference (read-only in edit forms) ───────────────────────────────
-
-const EditableBullets = ({ bullets, onChange }: { bullets: string[]; onChange: (bs: string[]) => void }) => (
-  <div className="flex flex-col gap-1.5">
-    <span className="text-[10px] text-payne-gray tracking-widest uppercase">bullets</span>
-    <textarea
-      value={bullets.join('\n')}
-      onChange={e => onChange(e.target.value.split('\n'))}
-      rows={Math.max(4, bullets.length + 1)}
-      className="w-full bg-[#060e20] border border-[#1e3a5f] rounded px-3 py-2 text-xs text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-y font-jetbrains leading-relaxed"
-      placeholder={"each line is one bullet\n—\npress Enter to add a new bullet"}
-    />
   </div>
 )
 
@@ -297,31 +263,6 @@ const SkillsForm = ({
     </div>
   )
 }
-
-// ─── entry card display ───────────────────────────────────────────────────────
-
-const EntryCard = ({
-  children, onEdit, onDelete, expanded, onToggle,
-}: {
-  children: React.ReactNode; onEdit: () => void; onDelete: () => void;
-  expanded: boolean; onToggle: () => void;
-}) => (
-  <div className="border border-[#1a3050] rounded-lg overflow-hidden bg-[#08132a]">
-    <div
-      className="flex items-start justify-between px-4 py-3 cursor-pointer hover:bg-[#0c1a38] transition-colors"
-      onClick={onToggle}
-    >
-      <div className="flex-1 min-w-0">{children}</div>
-      <div className="flex items-center gap-1 ml-3 shrink-0" onClick={e => e.stopPropagation()}>
-        <PillBtn variant="ghost" onClick={onEdit}><Pencil size={11} /></PillBtn>
-        <PillBtn variant="danger" onClick={onDelete}><Trash2 size={11} /></PillBtn>
-        <span className="text-[#4a7090] ml-1">
-          {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        </span>
-      </div>
-    </div>
-  </div>
-)
 
 // ─── main page ────────────────────────────────────────────────────────────────
 
@@ -556,19 +497,33 @@ export default function ProfilePage() {
                 </motion.span>
               )}
             </AnimatePresence>
-
-            <PillBtn variant="default" onClick={() => fileRef.current?.click()}>
-              <Upload size={11} /> import .tex
-            </PillBtn>
-            <PillBtn variant="default" onClick={() => pdfFileRef.current?.click()} className={pdfImporting ? 'opacity-60' : ''}>
-              <Upload size={11} /> {pdfImporting ? 'parsing...' : 'import .pdf'}
-            </PillBtn>
-            <PillBtn variant="default" onClick={handleExportTex}>
-              <Download size={11} /> .tex
-            </PillBtn>
-            <PillBtn variant="default" onClick={handleExportMd}>
-              <FileText size={11} /> .md
-            </PillBtn>
+            
+            {/* Dropdown Import */}
+            <DropdownBtn 
+              label='import'
+              icon={<Upload size={11} />} 
+              align="right"
+            >
+              <DropItem onClick={() => fileRef.current?.click()}>
+                <Upload size={11} /> import .tex
+              </DropItem>
+              <DropItem onClick={() => pdfFileRef.current?.click()}>
+                <Upload size={11} /> {pdfImporting ? 'parsing...' : 'import .pdf'}
+              </DropItem>
+            </DropdownBtn>
+            {/* Dropdown Export */}
+            <DropdownBtn 
+              label='export'
+              icon={<Download size={11} />} 
+              align="right"
+            >
+              <DropItem onClick={handleExportTex}>
+                <Download size={11} /> .tex
+              </DropItem>
+              <DropItem onClick={handleExportMd}>
+                <FileText size={11} /> .md
+              </DropItem>
+            </DropdownBtn>
             <Link
               to="/create"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-jetbrains bg-payne-gray text-white hover:bg-[#5a7d91] transition-all"
