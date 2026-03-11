@@ -211,7 +211,11 @@ function parseSkills(content: string): SkillsEntry[] {
   let match
 
   while ((match = skillRegex.exec(content)) !== null) {
-    const category = match[1].replace(/:$/, '').replace(/\\&/g, '&').trim()
+    const rawCategory = match[1]
+    // Require a trailing colon to avoid false-positives from \textbf{} in bullet points.
+    // Skills categories are formatted as \textbf{Languages:} — prose bold is not.
+    if (!rawCategory.trimEnd().endsWith(':')) continue
+    const category = rawCategory.replace(/:$/, '').replace(/\\&/g, '&').trim()
     const technologies = (match[2] || match[3] || '').replace(/\\&/g, '&').trim()
     if (category && technologies) {
       entries.push({ id: crypto.randomUUID(), category, technologies })
@@ -256,18 +260,20 @@ export function parseTexResume(tex: string): ProfileData {
     }
   }
 
-  const parts = cleaned.split(/\\section\{([^}]+)\}/)
+  // \*? handles both \section{} and \section*{} (starred variant common in resume templates)
+  const parts = cleaned.split(/\\section\*?\{([^}]+)\}/)
   for (let i = 1; i < parts.length; i += 2) {
     const sectionName = parts[i].toLowerCase().trim()
     const sectionContent = parts[i + 1] || ''
 
-    if (sectionName === 'education') {
+    // Fuzzy matching — handles common variants like "Work Experience", "Skills", "Technologies", etc.
+    if (sectionName.includes('education') || sectionName.includes('academic')) {
       result.education = parseEducation(sectionContent)
-    } else if (sectionName === 'experience') {
+    } else if (sectionName.includes('experience') || sectionName.includes('employment') || sectionName.includes('work history')) {
       result.experience = parseExperience(sectionContent)
-    } else if (sectionName === 'projects') {
+    } else if (sectionName.includes('project')) {
       result.projects = parseProjects(sectionContent)
-    } else if (sectionName === 'technical skills') {
+    } else if (sectionName.includes('skill') || sectionName.includes('technolog') || sectionName.includes('tool')) {
       result.skills = parseSkills(sectionContent)
     }
   }

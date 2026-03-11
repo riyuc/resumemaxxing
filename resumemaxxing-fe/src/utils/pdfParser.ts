@@ -117,7 +117,7 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   // Detect bullet lines (start with common bullet markers)
   const isBullet = (s: string) => /^[\u2022\u25cf\u25aa\-\*]/.test(s.trim())
   // Detect date-like strings — requires a range or year span
-  const DATE_RE = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{4})\b.{0,25}(\d{4}|Present|Current)\b/i
+  const DATE_RE = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Spring|Summer|Fall|Winter|January|February|March|April|June|July|August|September|October|November|December\d{4})\b.{0,25}(\d{4}|Present|Current)\b/i
   const hasDate = (s: string) => DATE_RE.test(s)
   // Split a line like "Acme Corp   Jan 2022 – May 2023" into prefix + dates
   const splitDateLine = (s: string): { prefix: string; dates: string } => {

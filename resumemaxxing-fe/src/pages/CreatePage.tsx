@@ -644,9 +644,16 @@ export default function CreatePage() {
     return () => iframe.removeEventListener('load', resize)
   }, [resumeHtmlFinal])
 
-  // postMessage listener for contenteditable edit-on-preview
+  // postMessage listener for contenteditable edit-on-preview + break-avoidance height updates
   useEffect(() => {
     const handler = (e: MessageEvent) => {
+      // Break-avoidance script posts adjusted body height after inserting page spacers.
+      // Handle regardless of editMode so pageCount stays accurate.
+      if (e.data?.type === 'resume-height') {
+        const h = e.data.height as number
+        if (h > 0) setContentHeight(h)
+        return
+      }
       if (!editMode) return
       if (e.data?.type === 'resume-focus') { setIframeEditing(true); return }
       if (e.data?.type !== 'resume-input') return
@@ -666,7 +673,10 @@ export default function CreatePage() {
 
   const eId = (type: SectionType) => editingEntry?.type === type ? editingEntry.id : null
 
-  const pageCount = contentHeight > 0 ? Math.max(1, Math.ceil(contentHeight / 1056)) : 1
+  const marginPx = Math.round(format.pageMargin * 96)
+  const contentPerPage = 1056 - 2 * marginPx
+  // contentHeight = body scrollHeight = marginPx (body top padding) + actual content
+  const pageCount = contentHeight > 0 ? Math.max(1, Math.ceil((contentHeight - marginPx) / contentPerPage)) : 1
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -1092,21 +1102,31 @@ export default function CreatePage() {
               {Array.from({ length: pageCount }, (_, i) => (
                 <div
                   key={i}
-                  className="w-full shadow-2xl rounded overflow-hidden shrink-0 bg-white"
+                  className="w-full shadow-2xl rounded shrink-0 bg-white"
                   style={{ height: 1056 }}
                 >
-                  <iframe
-                    ref={i === 0 ? iframeRef : undefined}
-                    srcDoc={resumeHtmlFinal}
-                    title={`Resume Page ${i + 1}`}
-                    sandbox={i === 0 && editMode ? 'allow-scripts allow-same-origin' : 'allow-same-origin'}
-                    className={cn('w-full border-0 bg-white block', i === 0 && editMode && 'cursor-pointer')}
-                    style={{
-                      height: Math.max(contentHeight || 1056, 1056),
-                      transform: `translateY(-${i * 1056}px)`,
-                      marginBottom: `-${i * 1056}px`,
-                    }}
-                  />
+                  {/* pages 2+ get a top spacer; page 1 uses body CSS padding-top naturally */}
+                  {i > 0 && <div style={{ height: marginPx }} />}
+                  {/* content clip window:
+                      page 1 → clips body-top-padding + contentPerPage (= marginPx + contentPerPage)
+                      page 2+ → clips exactly contentPerPage */}
+                  <div style={{ height: i === 0 ? marginPx + contentPerPage : contentPerPage, overflow: 'hidden' }}>
+                    <iframe
+                      ref={i === 0 ? iframeRef : undefined}
+                      srcDoc={resumeHtmlFinal}
+                      title={`Resume Page ${i + 1}`}
+                      sandbox="allow-scripts allow-same-origin"
+                      className={cn('w-full border-0 bg-white block', i === 0 && editMode && 'cursor-pointer')}
+                      style={{
+                        height: Math.max(contentHeight || contentPerPage, contentPerPage),
+                        // page 1: no shift; page i>0: skip body-top + i full content pages
+                        transform: `translateY(-${i === 0 ? 0 : marginPx + i * contentPerPage}px)`,
+                        marginBottom: `-${i === 0 ? 0 : marginPx + i * contentPerPage}px`,
+                      }}
+                    />
+                  </div>
+                  {/* bottom page margin for every page */}
+                  <div style={{ height: marginPx }} />
                 </div>
               ))}
             </div>

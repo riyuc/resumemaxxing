@@ -353,7 +353,7 @@ function makeResumeCss(fmt: ResumeFormat): string {
     line-height: ${fmt.lineHeight};
     color: #000;
     background: #fff;
-    padding: ${m}in;
+    padding: ${m}in ${m}in 0;
     max-width: 8.5in;
     margin: 0 auto;
     -webkit-font-smoothing: antialiased;
@@ -585,6 +585,49 @@ export function generateResumeHtml(
   });
 })();</script>` : ''
 
+  // Page-break avoidance script — always injected (not editable-only).
+  // Runs after fonts load, inserts zero-height spacers before elements that straddle
+  // a page boundary, then posts the new body height so React can update pageCount.
+  //
+  // Page boundaries (from iframe top):  M + C*k   for k = 1, 2, ...
+  //   M = body padding-top (= pageMargin * 96 px)
+  //   C = content per page (= 1056 − 2*M px)
+  //
+  // Elements handled:
+  //   .bullets li  — prevent mid-sentence bullet splits
+  //   .sec-title   — prevent orphan section headings (push if within 50px of a break)
+  const _M = Math.round(fmt.pageMargin * 96)
+  const _C = 1056 - 2 * _M
+  const breakScript = `<script>(function(){
+  var M=${_M},C=${_C};
+  function bps(){var a=[],y=M+C,max=document.body.scrollHeight+C;while(y<max){a.push(y);y+=C;}return a;}
+  function run(){
+    var chg,g=0;
+    do{
+      chg=false;
+      var bs=bps();
+      var els=Array.from(document.querySelectorAll('.bullets li,.sec-title'));
+      for(var i=0;i<els.length;i++){
+        var el=els[i],isSec=el.classList.contains('sec-title');
+        var t=el.getBoundingClientRect().top,b=el.getBoundingClientRect().bottom;
+        for(var j=0;j<bs.length;j++){
+          // For sec-title: also push if ending within 50px of a break (orphan prevention)
+          if(t<bs[j]&&b+(isSec?50:0)>bs[j]){
+            var sp=document.createElement('div');
+            sp.style.height=(bs[j]-t)+'px';
+            el.parentNode.insertBefore(sp,el);
+            chg=true;break;
+          }
+        }
+        if(chg)break;
+      }
+    }while(chg&&++g<20);
+    window.parent.postMessage({type:'resume-height',height:document.body.scrollHeight},'*');
+  }
+  function onReady(){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(run).catch(run);}else{setTimeout(run,150);}}
+  if(document.readyState==='complete'){onReady();}else{window.addEventListener('load',onReady);}
+})();</script>`
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -597,6 +640,7 @@ export function generateResumeHtml(
     <div class="contact">${contactParts.join('<span class="sep">|</span>')}</div>
   </div>
   ${eduHtml}${expHtml}${projHtml}${skillHtml}
+  ${breakScript}
   ${editScript}
 </body>
 </html>`
