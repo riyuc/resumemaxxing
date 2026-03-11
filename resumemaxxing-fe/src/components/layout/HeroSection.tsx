@@ -15,9 +15,7 @@ const HeroSection = () => {
       <motion.div {...fade(0)} className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5 text-xs flex-wrap">
           <span className="text-[#4a7090]">$</span>
-          <span className="text-[#6a8aaa]">AI</span>
-          <span className="text-[#8aaac8]">god</span>
-          <span className="text-[#c8d8f0] font-bold">pls</span>
+          <span className="text-[#6a8aaa]">ai_god_pls</span>
           <span className="text-payne-gray">--help</span>
           <span className="text-payne-gray">--me</span>
         </div>
@@ -47,11 +45,8 @@ const HeroSection = () => {
           <span className="text-payne-gray">layouts</span>
           <span className="text-[#8aaac8]">easily adjust formatting like it's google docs.</span>
           <span className="text-payne-gray">memory</span>
-          <span className="text-[#8aaac8]">
+          <span className="flex flex-col gap-1 text-[#8aaac8]">
             set up once — reuse forever, no subscriptions
-            <span className="blur-sm hover:blur-none focus:blur-none transition-all duration-300 ml-1 text-[#6a8aaa] italic cursor-default">
-              (not everything has to be a saas...)
-            </span> 
           </span>
           <span className="text-payne-gray">experiment</span>
           <span className="text-[#8aaac8]">test resume advice from the internet instantly</span>

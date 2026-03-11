@@ -702,6 +702,7 @@ export default function CreatePage() {
               <DropdownBtn label="import" icon={<Upload size={11} />} align="right">
                 <DropItem onClick={() => texRef.current?.click()}><FileText size={12} className="text-payne-gray" /> .tex file</DropItem>
                 <DropItem onClick={() => pdfRef.current?.click()}><FileText size={12} className="text-payne-gray" /> .pdf file</DropItem>
+                <DropItem onClick={() => pdfRef.current?.click()}><FileText size={12} className="text-payne-gray" /> from profile</DropItem>
               </DropdownBtn>
               <input ref={texRef} type="file" accept=".tex" className="hidden" onChange={handleTexImport} />
               <input ref={pdfRef} type="file" accept=".pdf" className="hidden" onChange={handlePdfImport} />
@@ -1077,6 +1078,9 @@ export default function CreatePage() {
             </PillBtn>
             <PillBtn variant="default" onClick={openPdfPreview}>
               <Printer size={11} /> PDF preview
+            </PillBtn>
+            <PillBtn variant="default" onClick={() => console.log("hello")}>
+              <Printer size={11} /> save profile
             </PillBtn>
           </div>
         </div>

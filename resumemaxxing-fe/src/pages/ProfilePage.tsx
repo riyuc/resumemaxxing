@@ -3,6 +3,7 @@ import {
   Plus, X, Trash2, Pencil, Check, GraduationCap, Briefcase,
   Code2, Wrench, User, Upload, TerminalSquare, Download,
   FileText,
+  CircleQuestionMark,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router'
@@ -279,6 +280,8 @@ export default function ProfilePage() {
   const [expandedIds, setExpandedIds]         = useState<Set<string>>(new Set())
   const [importStatus, setImportStatus]       = useState<'idle' | 'success' | 'error'>('idle')
   const [pdfImporting, setPdfImporting]       = useState(false)
+  const [isQuestionMarkHovered, 
+    setIsQuestionMarkHovered ]                = useState(false)
   const fileRef    = useRef<HTMLInputElement>(null)
   const pdfFileRef = useRef<HTMLInputElement>(null)
 
@@ -478,6 +481,17 @@ export default function ProfilePage() {
             <span className="text-payne-gray">~/</span>
             <span className="text-porcelain">profile</span>
             <span className="text-payne-gray">.tsx</span>
+            <CircleQuestionMark 
+              onMouseEnter={() => setIsQuestionMarkHovered(true)}
+              onMouseLeave={() => setIsQuestionMarkHovered(false)}
+              className='hover:cursor-pointer'
+              size={14}
+            />
+            {isQuestionMarkHovered && (
+              <div>
+                Hello
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -534,9 +548,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className='my-4 flex font-jetbrains text-xs'>
-          Add all the context to this profile (doesn't need to be curated), 
-          agentic flow will take context from here to generate your resume.
+        <div className='my-4 flex flex-col font-jetbrains text-xs'>
+          <p>Add all the context to this profile (doesn't need to be curated), </p>
+          <p>agentic flow will take context from here to generate your resume.</p>
         </div>
 
         {/* ── contact section ── */}

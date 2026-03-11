@@ -53,7 +53,7 @@ const Navbar = () => {
             log in
           </Link> */}
           <BlurredButton href="/create" className="text-xs py-1.5 px-4">
-            start building ↗
+            start building!
           </BlurredButton>
         </div>
 

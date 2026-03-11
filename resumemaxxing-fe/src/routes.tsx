@@ -39,6 +39,10 @@ export const routes: RouteObject[] = [
         path: '/profile',
         element: <ProfilePage />,
       },
+      {
+        path: '/resume',
+        element: <ProfilePage />,
+      },
     ],
   },
   // Example: Different layout for auth pages
