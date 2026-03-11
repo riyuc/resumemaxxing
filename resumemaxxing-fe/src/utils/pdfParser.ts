@@ -93,7 +93,7 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
     education:  /^(education|academic)/i,
     experience: /^(experience|work experience|employment|professional)/i,
     projects:   /^(projects|personal projects|technical projects)/i,
-    skills:     /^(skills|technical skills|technologies|languages)/i,
+    skills:     /^(technical skills|technologies|languages)/i,
   }
 
   const sectionRanges: Array<{ type: string; start: number }> = []
@@ -144,7 +144,7 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
     let school = '', degree = '', location = '', dates = '', coursework = ''
     for (const line of lines) {
       if (/relevant coursework/i.test(line)) { coursework = line.replace(/relevant coursework[:\s]*/i, ''); continue }
-      if (/^(b\.|m\.|ph\.?d|bachelor|master|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(line)) {
+      if (/^(b\.|m\.|ph\.?d|bachelor|master|honours|honor|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(line)) {
         const dm = SINGLE_DATE_RE.exec(line)
         if (dm && !dates) {
           // Preserve "Expected Graduation:" label in the dates field

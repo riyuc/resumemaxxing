@@ -19,7 +19,7 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-2.5 group">
           <MikuLogo size={42} />
           <span className="font-jetbrains text-sm font-semibold text-[#c8d8f0] group-hover:text-white transition-colors tracking-tight">
-            i love AI
+            i love resumemaxxing
           </span>
         </Link>
 
