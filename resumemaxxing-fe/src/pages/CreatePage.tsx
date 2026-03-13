@@ -6,7 +6,7 @@ import {
   SquarePen,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { parseTexResume } from '@/utils/texParser'
+import { parseResumeWithAI } from '@/utils/aiParser'
 import {
   exportAsTex, exportAsMd, generateResumeHtml, printResumePdf, downloadFile,
   FONT_OPTIONS, DEFAULT_FORMAT,
@@ -568,42 +568,37 @@ export default function CreatePage() {
   const deleteSkill      = (id: string) => setProfile(p => ({ ...p, skills:     p.skills.filter(e => e.id !== id) }))
 
   // ── imports ──
-  const handleTexImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTexImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      try {
-        const parsed = parseTexResume(ev.target?.result as string)
-        setProfile(parsed)
-        const ns = sectionsFromData(parsed)
-        setSections(prev => { const m = [...prev]; ns.forEach(s => { if (!m.includes(s)) m.push(s) }); return m })
-        setImportStatus('success'); setTimeout(() => setImportStatus('idle'), 3000)
-      } catch { setImportStatus('error'); setTimeout(() => setImportStatus('idle'), 3000) }
-    }
-    reader.readAsText(file); e.target.value = ''
+    setPdfImporting(true)
+    try {
+      const text = await file.text()
+      const parsed = await parseResumeWithAI(text)
+      setProfile(parsed)
+      const ns = sectionsFromData(parsed)
+      setSections(prev => { const m = [...prev]; ns.forEach(s => { if (!m.includes(s)) m.push(s) }); return m })
+      setImportStatus('success'); setTimeout(() => setImportStatus('idle'), 3000)
+    } catch (err) {
+      console.error('TeX import failed:', err)
+      setImportStatus('error'); setTimeout(() => setImportStatus('idle'), 3000)
+    } finally { setPdfImporting(false); e.target.value = '' }
   }
 
   const handlePdfImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return
     setPdfImporting(true)
     try {
-      const { extractTextFromPdf, parsePdfText } = await import('@/utils/pdfParser')
+      const { extractTextFromPdf } = await import('@/utils/pdfParser')
       const text = await extractTextFromPdf(file)
-      const parsed = parsePdfText(text)
+      const parsed = await parseResumeWithAI(text)
       setProfile(prev => ({
-        contact: { ...prev.contact, ...parsed.contact },
-        education:  parsed.education  ?? prev.education,
-        experience: parsed.experience ?? prev.experience,
-        projects:   parsed.projects   ?? prev.projects,
-        skills:     parsed.skills     ?? prev.skills,
+        contact:    { ...prev.contact, ...parsed.contact },
+        education:  parsed.education,
+        experience: parsed.experience,
+        projects:   parsed.projects,
+        skills:     parsed.skills,
       }))
-      const ns = sectionsFromData({
-        contact: DEFAULT_PROFILE.contact,
-        education:  parsed.education  ?? [],
-        experience: parsed.experience ?? [],
-        projects:   parsed.projects   ?? [],
-        skills:     parsed.skills     ?? [],
-      })
+      const ns = sectionsFromData(parsed)
       setSections(prev => { const m = [...prev]; ns.forEach(s => { if (!m.includes(s)) m.push(s) }); return m })
       setImportStatus('success'); setTimeout(() => setImportStatus('idle'), 3000)
     } catch (err) {
