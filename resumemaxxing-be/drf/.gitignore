@@ -1,0 +1,28 @@
+# Django Stuff
+*.log
+*.pot
+*.mo
+
+# Local development database (SQLite by default)
+db.sqlite3
+
+# Media and static file directories (if not handled by version control/a separate service)
+media/
+static/ 
+
+# Virtual environments
+env/
+venv/
+.venv/
+# other common names
+lib/
+lib64/
+parts/
+sdist/
+var/
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
