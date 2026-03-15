@@ -6,6 +6,7 @@ import {
   PROFILE_TO_RESUME_SYSTEM_PROMPT,
   TAILOR_RESUME_SYSTEM_PROMPT,
 } from './prompts/prompts'
+import { openapi, fromTypes } from '@elysiajs/openapi'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -21,9 +22,10 @@ async function callClaude(system: string, userContent: string): Promise<string> 
   return raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
 }
 
-const app = new Elysia()
+export default new Elysia()
   .use(cors())
   .get('/', () => 'resumemaxxing api')
+  .use(openapi())
 
   // Parse any resume format (LaTeX / PDF text / plain text) → ProfileData
   .post('/parse-resume', async ({ body }) => {
@@ -56,9 +58,3 @@ const app = new Elysia()
       jobDescription: t.String(),
     }),
   })
-
-  .listen(3000)
-
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`)
-
-export default app;
