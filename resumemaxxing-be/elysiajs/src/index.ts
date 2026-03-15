@@ -22,7 +22,7 @@ async function callClaude(system: string, userContent: string): Promise<string> 
   return raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
 }
 
-export default new Elysia()
+const app = new Elysia()
   .use(cors())
   .get('/', () => 'resumemaxxing api')
   .use(openapi())
@@ -58,3 +58,5 @@ export default new Elysia()
       jobDescription: t.String(),
     }),
   })
+
+export default app;
