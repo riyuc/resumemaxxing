@@ -346,6 +346,7 @@ function makeResumeCss(fmt: ResumeFormat): string {
   return `${fontImport}${cmScFontFace}
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { overflow: hidden; }
   @page { size: letter; margin: ${m}in; }
   body {
     font-family: ${fmt.fontFamily};

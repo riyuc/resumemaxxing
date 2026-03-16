@@ -1111,7 +1111,7 @@ export default function CreatePage() {
                       srcDoc={resumeHtmlFinal}
                       title={`Resume Page ${i + 1}`}
                       sandbox="allow-scripts allow-same-origin"
-                      className={cn('w-full border-0 bg-white block', i === 0 && editMode && 'cursor-pointer')}
+                      className={cn('w-full border-0 overflow-hidden bg-white block', i === 0 && editMode && 'cursor-pointer')}
                       style={{
                         height: Math.max(contentHeight || contentPerPage, contentPerPage),
                         // page 1: no shift; page i>0: skip body-top + i full content pages
@@ -1234,7 +1234,7 @@ export default function CreatePage() {
               title="PDF Preview"
               sandbox="allow-same-origin"
               className="w-full border-0 bg-white"
-              style={{ minHeight: '1056px' }}
+              style={{ minHeight: '1056px', overflow: 'hidden' }}
               onLoad={handlePdfPreviewLoad}
             />
             {/* page-break overlays */}
