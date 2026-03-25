@@ -17,6 +17,7 @@ import type {
 import type { ResumeFormat } from '@/utils/profileExport'
 import { cn } from '@/lib/utils'
 import { DropdownBtn, DropItem } from '@/components/ui/dropdown-btn'
+import { ProfileDataSchema } from '@/schemas/profile'
 
 // ─── storage ──────────────────────────────────────────────────────────────────
 
@@ -30,12 +31,19 @@ const DEFAULT_PROFILE: ProfileData = {
 }
 
 function loadProfile(): ProfileData {
-  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : DEFAULT_PROFILE }
-  catch { return DEFAULT_PROFILE }
+  try { 
+    const s = localStorage.getItem(STORAGE_KEY);
+    const result = ProfileDataSchema.safeParse(s ? JSON.parse(s) : null);
+    return result.success ? result.data : DEFAULT_PROFILE
+  } catch { 
+    return DEFAULT_PROFILE 
+  }
 }
 
 function loadSections(): SectionType[] {
-  try { const s = localStorage.getItem(SECTIONS_KEY); return s ? JSON.parse(s) : [] }
+  try { 
+    const s = localStorage.getItem(SECTIONS_KEY); 
+    return s ? JSON.parse(s) : [] }
   catch { return [] }
 }
 
@@ -666,7 +674,7 @@ export default function CreatePage() {
     return () => window.removeEventListener('message', handler)
   }, [editMode])
 
-  const eId = (type: SectionType) => editingEntry?.type === type ? editingEntry.id : null
+  const eId = (type: SectionType) => editingEntry?.type === type ? editingEntry?.id : null
 
   const marginPx = Math.round(format.pageMargin * 96)
   const contentPerPage = 1056 - 2 * marginPx

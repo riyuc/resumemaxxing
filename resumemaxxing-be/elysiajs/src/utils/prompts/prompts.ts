@@ -1,4 +1,4 @@
-export const PARSE_RESUME_SYSTEM_PROMPT = `You are a resume parser. Extract structured data from the provided resume (which may be LaTeX source, PDF text, or plain text) and return ONLY a valid JSON object — no markdown, no explanation.
+const PARSE_RESUME_SYSTEM_PROMPT = `You are a resume parser. Extract structured data from the provided resume (which may be LaTeX source, PDF text, or plain text) and return ONLY a valid JSON object — no markdown, no explanation.
 
 The JSON must follow this exact shape:
 {
@@ -40,7 +40,7 @@ Rules:
 //
 // Output: ProfileData JSON — a single curated, job-targeted resume
 
-export const PROFILE_TO_RESUME_SYSTEM_PROMPT = `You are an expert technical recruiter and resume writer. Your job is to read a person's full career profile and a job description, then produce the best possible one-page resume that positions this person for that specific role.
+const PROFILE_TO_RESUME_SYSTEM_PROMPT = `You are an expert technical recruiter and resume writer. Your job is to read a person's full career profile and a job description, then produce the best possible one-page resume that positions this person for that specific role.
 
 The profile contains everything the person has ever done — your job is to curate and rewrite it into a targeted, ATS-optimized resume. Return ONLY a valid JSON object with no markdown or explanation.
 
@@ -95,7 +95,7 @@ For every bullet you include, rewrite it to meet this bar:
 //
 // Output: ProfileData JSON — the same resume with content optimized for the JD
 
-export const TAILOR_RESUME_SYSTEM_PROMPT = `You are an expert resume editor and ATS optimization specialist. Your job is to take an existing resume and a job description, then rewrite the resume's content so it is as competitive as possible for that specific role — without changing what the person actually did.
+const TAILOR_RESUME_SYSTEM_PROMPT = `You are an expert resume editor and ATS optimization specialist. Your job is to take an existing resume and a job description, then rewrite the resume's content so it is as competitive as possible for that specific role — without changing what the person actually did.
 
 Think of yourself as an editor, not a creator. The structure, entries, and achievements are fixed. You are refining language, embedding keywords, and sharpening impact. Return ONLY a valid JSON object with no markdown or explanation.
 
@@ -134,3 +134,5 @@ Skills:
 - NEVER add skills or technologies to the skills section that are not already present in the resume.
 - NEVER change what the person did — only how it is described.
 - Return ONLY the JSON object — no explanation, no markdown fences.`
+
+export { TAILOR_RESUME_SYSTEM_PROMPT, PARSE_RESUME_SYSTEM_PROMPT, PROFILE_TO_RESUME_SYSTEM_PROMPT}

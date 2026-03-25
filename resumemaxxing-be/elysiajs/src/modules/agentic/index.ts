@@ -5,22 +5,16 @@ import {
   PARSE_RESUME_SYSTEM_PROMPT,
   PROFILE_TO_RESUME_SYSTEM_PROMPT,
   TAILOR_RESUME_SYSTEM_PROMPT,
-} from './prompts/prompts'
+} from '../../utils/prompts/prompts'
 import { openapi, fromTypes } from '@elysiajs/openapi'
+import { callClaude } from '../../utils/claude/claude'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-async function callClaude(system: string, userContent: string): Promise<string> {
-  const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 4096,
-    system,
-    messages: [{ role: 'user', content: userContent }],
-  })
-  const raw = (message.content[0] as { text: string }).text.trim()
-  // Strip markdown code fences if the model wrapped the JSON anyway
-  return raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
-}
+// with Elysia we have a few choices for creating controllers
+// 1. Use the Elysia instance as the controller itself.
+// 2. Have a controller that is decoupled (not related) to HTTP requests or Elysia.
+// i'm going with the second approach to have the MVC
 
 const app = new Elysia()
   .use(cors())
@@ -29,7 +23,8 @@ const app = new Elysia()
 
   // Parse any resume format (LaTeX / PDF text / plain text) → ProfileData
   .post('/parse-resume', async ({ body }) => {
-    const json = await callClaude(PARSE_RESUME_SYSTEM_PROMPT, body.text)
+    const json = await callClaude(
+      PARSE_RESUME_SYSTEM_PROMPT, body.text, anthropic)
     return JSON.parse(json)
   }, {
     body: t.Object({ text: t.String() }),
@@ -38,7 +33,7 @@ const app = new Elysia()
   // Full career profile + job description → curated, targeted resume
   .post('/generate-resume', async ({ body }) => {
     const userContent = `<profile>${JSON.stringify(body.profile)}</profile>\n\n<job_description>${body.jobDescription}</job_description>`
-    const json = await callClaude(PROFILE_TO_RESUME_SYSTEM_PROMPT, userContent)
+    const json = await callClaude(PROFILE_TO_RESUME_SYSTEM_PROMPT, userContent, anthropic)
     return JSON.parse(json)
   }, {
     body: t.Object({
@@ -50,7 +45,7 @@ const app = new Elysia()
   // Existing resume + job description → same resume with content tailored to the JD
   .post('/tailor-resume', async ({ body }) => {
     const userContent = `<resume>${JSON.stringify(body.resume)}</resume>\n\n<job_description>${body.jobDescription}</job_description>`
-    const json = await callClaude(TAILOR_RESUME_SYSTEM_PROMPT, userContent)
+    const json = await callClaude(TAILOR_RESUME_SYSTEM_PROMPT, userContent, anthropic)
     return JSON.parse(json)
   }, {
     body: t.Object({
