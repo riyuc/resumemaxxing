@@ -1,12 +1,10 @@
 import { Elysia, t } from 'elysia'
-import { cors } from '@elysiajs/cors'
 import Anthropic from '@anthropic-ai/sdk'
 import {
   PARSE_RESUME_SYSTEM_PROMPT,
   PROFILE_TO_RESUME_SYSTEM_PROMPT,
   TAILOR_RESUME_SYSTEM_PROMPT,
 } from '../../utils/prompts/prompts'
-import { openapi, fromTypes } from '@elysiajs/openapi'
 import { callClaude } from '../../utils/claude/claude'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -16,10 +14,8 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 // 2. Have a controller that is decoupled (not related) to HTTP requests or Elysia.
 // i'm going with the second approach to have the MVC
 
-const app = new Elysia()
-  .use(cors())
+const agentic = new Elysia()
   .get('/', () => 'resumemaxxing api')
-  .use(openapi())
 
   // Parse any resume format (LaTeX / PDF text / plain text) → ProfileData
   .post('/parse-resume', async ({ body }) => {
@@ -54,4 +50,4 @@ const app = new Elysia()
     }),
   })
 
-export default app;
+export default agentic;
