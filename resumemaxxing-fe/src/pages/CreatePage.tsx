@@ -17,6 +17,10 @@ import type {
 import type { ResumeFormat } from '@/utils/profileExport'
 import { cn } from '@/lib/utils'
 import { DropdownBtn, DropItem } from '@/components/ui/dropdown-btn'
+import { EducationForm } from '@/components/forms/EducationForm'
+import { ExperienceForm } from '@/components/forms/ExperienceForm'
+import { ProjectForm } from '@/components/forms/ProjectForm'
+import { SkillsForm } from '@/components/forms/SkillsForm'
 import { ProfileDataSchema } from '@/schemas/profile'
 
 // ─── storage ──────────────────────────────────────────────────────────────────
@@ -179,165 +183,6 @@ const EditableBullets = ({ bullets, onChange }: { bullets: string[]; onChange: (
 }
 
 // ─── entry forms (with onChange for live preview) ─────────────────────────────
-
-const EducationForm = ({ initial, onSave, onCancel, onChange }: {
-  initial?: Partial<EducationEntry>;
-  onSave: (e: Omit<EducationEntry, 'id'>) => void;
-  onCancel: () => void;
-  onChange?: (draft: Omit<EducationEntry, 'id'>) => void;
-}) => {
-  const [school, setSchool]   = useState(initial?.school ?? '')
-  const [location, setLoc]    = useState(initial?.location ?? '')
-  const [degree, setDegree]   = useState(initial?.degree ?? '')
-  const [dates, setDates]     = useState(initial?.dates ?? '')
-  const [coursework, setCw]   = useState(initial?.coursework ?? '')
-  const [rawText, setRaw]     = useState(initial?.rawText ?? '')
-
-  const draft = useMemo(() => ({ school, location, degree, dates, coursework, rawText }), [school, location, degree, dates, coursework, rawText])
-  const mounted = useRef(false)
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return }
-    onChange?.(draft)
-  }, [draft]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="school" value={school} onChange={setSchool} placeholder="Concordia University" />
-        <Field label="location" value={location} onChange={setLoc} placeholder="Montreal, QC" />
-        <Field label="degree" value={degree} onChange={setDegree} placeholder="B.Sc. Computer Science" />
-        <Field label="dates" value={dates} onChange={setDates} placeholder="Sep 2022 – Dec 2026" />
-      </div>
-      <Field label="coursework" value={coursework} onChange={setCw} placeholder="OS, Algorithms, AI..." />
-      <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] text-[#4a7090] tracking-widest">// casual notes — clubs, what you learned, achievements</span>
-        <textarea value={rawText} onChange={e => setRaw(e.target.value)}
-          placeholder={SECTION_META.education.placeholder} rows={3}
-          className="bg-[#060e20] border border-payne-gray/30 rounded-lg px-3 py-2.5 text-xs text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
-        />
-      </div>
-      <div className="flex gap-2 pt-1">
-        <PillBtn variant="accent" onClick={() => onSave(draft)}><Check size={12} /> save</PillBtn>
-        <PillBtn variant="ghost" onClick={onCancel}><X size={12} /> cancel</PillBtn>
-      </div>
-    </div>
-  )
-}
-
-const ExperienceForm = ({ initial, onSave, onCancel, onChange }: {
-  initial?: Partial<ExperienceEntry>;
-  onSave: (e: Omit<ExperienceEntry, 'id'>) => void;
-  onCancel: () => void;
-  onChange?: (draft: Omit<ExperienceEntry, 'id'>) => void;
-}) => {
-  const [company, setCompany]   = useState(initial?.company ?? '')
-  const [location, setLoc]      = useState(initial?.location ?? '')
-  const [role, setRole]         = useState(initial?.role ?? '')
-  const [dates, setDates]       = useState(initial?.dates ?? '')
-  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
-  const [rawText, setRaw]       = useState(initial?.rawText ?? '')
-
-  const draft = useMemo(() => ({ company, location, role, dates, bullets, rawText }), [company, location, role, dates, bullets, rawText])
-  const mounted = useRef(false)
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return }
-    onChange?.(draft)
-  }, [draft]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="company" value={company} onChange={setCompany} placeholder="Shopify" />
-        <Field label="location" value={location} onChange={setLoc} placeholder="Toronto, ON" />
-        <Field label="role" value={role} onChange={setRole} placeholder="Software Engineering Intern" />
-        <Field label="dates" value={dates} onChange={setDates} placeholder="May 2025 – Dec 2025" />
-      </div>
-      <EditableBullets bullets={bullets} onChange={setBullets} />
-      <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] text-[#4a7090] tracking-widest">// casual notes — tech used, impact, what you shipped</span>
-        <textarea value={rawText} onChange={e => setRaw(e.target.value)}
-          placeholder={SECTION_META.experience.placeholder} rows={3}
-          className="bg-[#060e20] border border-payne-gray/30 rounded-lg px-3 py-2.5 text-xs text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
-        />
-      </div>
-      <div className="flex gap-2 pt-1">
-        <PillBtn variant="accent" onClick={() => onSave(draft)}><Check size={12} /> save</PillBtn>
-        <PillBtn variant="ghost" onClick={onCancel}><X size={12} /> cancel</PillBtn>
-      </div>
-    </div>
-  )
-}
-
-const ProjectForm = ({ initial, onSave, onCancel, onChange }: {
-  initial?: Partial<ProjectEntry>;
-  onSave: (e: Omit<ProjectEntry, 'id'>) => void;
-  onCancel: () => void;
-  onChange?: (draft: Omit<ProjectEntry, 'id'>) => void;
-}) => {
-  const [name, setName]         = useState(initial?.name ?? '')
-  const [techStack, setTech]    = useState(initial?.techStack ?? '')
-  const [dates, setDates]       = useState(initial?.dates ?? '')
-  const [bullets, setBullets]   = useState(initial?.bullets ?? [])
-  const [rawText, setRaw]       = useState(initial?.rawText ?? '')
-
-  const draft = useMemo(() => ({ name, techStack, dates, bullets, rawText }), [name, techStack, dates, bullets, rawText])
-  const mounted = useRef(false)
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return }
-    onChange?.(draft)
-  }, [draft]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="project name" value={name} onChange={setName} placeholder="AI Transcription Correction" />
-        <Field label="dates" value={dates} onChange={setDates} placeholder="Hackathon, 2025" />
-      </div>
-      <Field label="tech stack" value={techStack} onChange={setTech} placeholder="Python, FastAPI, React..." />
-      <EditableBullets bullets={bullets} onChange={setBullets} />
-      <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] text-[#4a7090] tracking-widest">// casual notes — what it does, how you built it, results</span>
-        <textarea value={rawText} onChange={e => setRaw(e.target.value)}
-          placeholder={SECTION_META.projects.placeholder} rows={3}
-          className="bg-[#060e20] border border-payne-gray/30 rounded-lg px-3 py-2.5 text-xs text-porcelain placeholder:text-[#4a7090] focus:outline-none focus:border-payne-gray resize-none font-jetbrains leading-relaxed"
-        />
-      </div>
-      <div className="flex gap-2 pt-1">
-        <PillBtn variant="accent" onClick={() => onSave(draft)}><Check size={12} /> save</PillBtn>
-        <PillBtn variant="ghost" onClick={onCancel}><X size={12} /> cancel</PillBtn>
-      </div>
-    </div>
-  )
-}
-
-const SkillsForm = ({ initial, onSave, onCancel, onChange }: {
-  initial?: Partial<SkillsEntry>;
-  onSave: (e: Omit<SkillsEntry, 'id'>) => void;
-  onCancel: () => void;
-  onChange?: (draft: Omit<SkillsEntry, 'id'>) => void;
-}) => {
-  const [category, setCat] = useState(initial?.category ?? '')
-  const [tech, setTech]    = useState(initial?.technologies ?? '')
-
-  const draft = useMemo(() => ({ category, technologies: tech }), [category, tech])
-  const mounted = useRef(false)
-  useEffect(() => {
-    if (!mounted.current) { mounted.current = true; return }
-    onChange?.(draft)
-  }, [draft]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="flex flex-col gap-3">
-      <Field label="category" value={category} onChange={setCat} placeholder="Languages, Frameworks..." />
-      <Field label="technologies" value={tech} onChange={setTech} placeholder="Python, TypeScript, Go..." />
-      <div className="flex gap-2 pt-1">
-        <PillBtn variant="accent" onClick={() => onSave(draft)}><Check size={12} /> save</PillBtn>
-        <PillBtn variant="ghost" onClick={onCancel}><X size={12} /> cancel</PillBtn>
-      </div>
-    </div>
-  )
-}
-
 const EntryCard = ({ children, onEdit, onDelete, expanded, onToggle, isEditing }: {
   children: React.ReactNode; onEdit: () => void; onDelete: () => void;
   expanded: boolean; onToggle: () => void; isEditing?: boolean;
