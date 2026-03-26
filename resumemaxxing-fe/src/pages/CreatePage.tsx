@@ -32,6 +32,7 @@ const FORMAT_KEY = 'agentic-resume-format'
 const DEFAULT_PROFILE: ProfileData = {
   contact: { name: '', phone: '', email: '', linkedin: '', github: '', portfolio: '' },
   education: [], experience: [], projects: [], skills: [],
+  research: [], leadership: [], volunteering: [], certifications: [], awards: [],
 }
 
 function loadProfile(): ProfileData {
@@ -99,10 +100,15 @@ function applyFieldEdit(
 // ─── constants ────────────────────────────────────────────────────────────────
 
 const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode; placeholder: string }> = {
-  education:  { label: 'EDUCATION',  icon: <GraduationCap size={13} />, placeholder: 'e.g. studied CS here, took AI/OS courses, 3.8 GPA, was in the coding club...' },
-  experience: { label: 'EXPERIENCE', icon: <Briefcase    size={13} />, placeholder: 'e.g. worked on payments infrastructure, improved success rates, led the migration from...' },
-  projects:   { label: 'PROJECTS',   icon: <Code2        size={13} />, placeholder: 'e.g. built a RAG pipeline for X, used embeddings + postgres, demoed at hackathon...' },
-  skills:     { label: 'SKILLS',     icon: <Wrench       size={13} />, placeholder: '' },
+  education:      { label: 'EDUCATION',      icon: <GraduationCap size={13} />, placeholder: 'e.g. studied CS here, took AI/OS courses, 3.8 GPA, was in the coding club...' },
+  experience:     { label: 'EXPERIENCE',     icon: <Briefcase     size={13} />, placeholder: 'e.g. worked on payments infrastructure, improved success rates, led the migration from...' },
+  projects:       { label: 'PROJECTS',       icon: <Code2         size={13} />, placeholder: 'e.g. built a RAG pipeline for X, used embeddings + postgres, demoed at hackathon...' },
+  skills:         { label: 'SKILLS',         icon: <Wrench        size={13} />, placeholder: '' },
+  research:       { label: 'RESEARCH',       icon: <GraduationCap size={13} />, placeholder: 'e.g. worked on NLP for low-resource languages, published at ACL...' },
+  leadership:     { label: 'LEADERSHIP',     icon: <Briefcase     size={13} />, placeholder: 'e.g. VP of the AI club, organized weekly workshops...' },
+  volunteering:   { label: 'VOLUNTEERING',   icon: <Briefcase     size={13} />, placeholder: 'e.g. tutored underprivileged students in math every Saturday...' },
+  certifications: { label: 'CERTIFICATIONS', icon: <Wrench        size={13} />, placeholder: '' },
+  awards:         { label: 'AWARDS',         icon: <Wrench        size={13} />, placeholder: '' },
 }
 
 // ─── atoms ────────────────────────────────────────────────────────────────────
@@ -420,13 +426,7 @@ export default function CreatePage() {
       const { extractTextFromPdf } = await import('@/utils/pdfParser')
       const text = await extractTextFromPdf(file)
       const parsed = await parseResumeWithAI(text)
-      setProfile(prev => ({
-        contact:    { ...prev.contact, ...parsed.contact },
-        education:  parsed.education,
-        experience: parsed.experience,
-        projects:   parsed.projects,
-        skills:     parsed.skills,
-      }))
+      setProfile(prev => ({ ...prev, ...parsed, contact: { ...prev.contact, ...parsed.contact } }))
       const ns = sectionsFromData(parsed)
       setSections(prev => { const m = [...prev]; ns.forEach(s => { if (!m.includes(s)) m.push(s) }); return m })
       setImportStatus('success'); setTimeout(() => setImportStatus('idle'), 3000)

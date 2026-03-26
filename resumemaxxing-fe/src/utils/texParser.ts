@@ -230,10 +230,8 @@ export function parseTexResume(tex: string): ProfileData {
 
   const result: ProfileData = {
     contact: { name: '', phone: '', email: '', linkedin: '', github: '', portfolio: '' },
-    education: [],
-    experience: [],
-    projects: [],
-    skills: [],
+    education: [], experience: [], projects: [], skills: [],
+    research: [], leadership: [], volunteering: [], certifications: [], awards: [],
   }
 
   const nameMatch = cleaned.match(/\\textbf\{\\Huge\s+\\scshape\s+([^}]+)\}/)

@@ -6,6 +6,8 @@ export type {
   ExperienceEntry,
   ProjectEntry,
   SkillsEntry,
+  CertificationEntry,
+  AwardEntry,
   ProfileData,
   ProfileDataApi,
 } from '@/schemas/profile'

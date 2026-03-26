@@ -6,19 +6,21 @@ import {
   TAILOR_RESUME_SYSTEM_PROMPT,
 } from '../../utils/prompts/prompts'
 import { callClaude } from '../../utils/claude/claude'
+import cors from '@elysiajs/cors'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // with Elysia we have a few choices for creating controllers
 // 1. Use the Elysia instance as the controller itself.
 // 2. Have a controller that is decoupled (not related) to HTTP requests or Elysia.
-// i'm going with the second approach to have the MVC
+// i'm going with the second approach to have MVC
 
 const agentic = new Elysia()
+  .use(cors())
   .get('/', () => 'resumemaxxing api')
 
   // Parse any resume format (LaTeX / PDF text / plain text) → ProfileData
-  .post('/parse-resume', async ({ body }) => {
+  .post('/parse', async ({ body }) => {
     const json = await callClaude(
       PARSE_RESUME_SYSTEM_PROMPT, body.text, anthropic)
     return JSON.parse(json)
@@ -27,7 +29,7 @@ const agentic = new Elysia()
   })
 
   // Full career profile + job description → curated, targeted resume
-  .post('/generate-resume', async ({ body }) => {
+  .post('/generate', async ({ body }) => {
     const userContent = `<profile>${JSON.stringify(body.profile)}</profile>\n\n<job_description>${body.jobDescription}</job_description>`
     const json = await callClaude(PROFILE_TO_RESUME_SYSTEM_PROMPT, userContent, anthropic)
     return JSON.parse(json)
@@ -39,7 +41,7 @@ const agentic = new Elysia()
   })
 
   // Existing resume + job description → same resume with content tailored to the JD
-  .post('/tailor-resume', async ({ body }) => {
+  .post('/tailor', async ({ body }) => {
     const userContent = `<resume>${JSON.stringify(body.resume)}</resume>\n\n<job_description>${body.jobDescription}</job_description>`
     const json = await callClaude(TAILOR_RESUME_SYSTEM_PROMPT, userContent, anthropic)
     return JSON.parse(json)

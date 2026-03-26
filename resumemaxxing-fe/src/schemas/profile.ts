@@ -69,12 +69,35 @@ export const SkillsEntrySchema = SkillsEntryApiSchema.extend({
   id: z.string(),
 })
 
+// research / leadership / volunteering share ExperienceEntry shape
+
+export const CertificationEntrySchema = z.object({
+  id:      z.string(),
+  title:   z.string().default(''),
+  issuer:  z.string().default(''),
+  date:    z.string().default(''),
+  rawText: z.string().default(''),
+})
+
+export const AwardEntrySchema = z.object({
+  id:          z.string(),
+  title:       z.string().default(''),
+  issuer:      z.string().default(''),
+  date:        z.string().default(''),
+  description: z.string().default(''),
+})
+
 export const ProfileDataSchema = z.object({
-  contact:    ContactSchema,
-  education:  z.array(EducationEntrySchema).default([]),
-  experience: z.array(ExperienceEntrySchema).default([]),
-  projects:   z.array(ProjectEntrySchema).default([]),
-  skills:     z.array(SkillsEntrySchema).default([]),
+  contact:        ContactSchema,
+  education:      z.array(EducationEntrySchema).default([]),
+  experience:     z.array(ExperienceEntrySchema).default([]),
+  projects:       z.array(ProjectEntrySchema).default([]),
+  skills:         z.array(SkillsEntrySchema).default([]),
+  research:       z.array(ExperienceEntrySchema).default([]),
+  leadership:     z.array(ExperienceEntrySchema).default([]),
+  volunteering:   z.array(ExperienceEntrySchema).default([]),
+  certifications: z.array(CertificationEntrySchema).default([]),
+  awards:         z.array(AwardEntrySchema).default([]),
 })
 
 // ─── inferred types ───────────────────────────────────────────────────────────
@@ -84,5 +107,7 @@ export type EducationEntry      = z.infer<typeof EducationEntrySchema>
 export type ExperienceEntry     = z.infer<typeof ExperienceEntrySchema>
 export type ProjectEntry        = z.infer<typeof ProjectEntrySchema>
 export type SkillsEntry         = z.infer<typeof SkillsEntrySchema>
+export type CertificationEntry  = z.infer<typeof CertificationEntrySchema>
+export type AwardEntry          = z.infer<typeof AwardEntrySchema>
 export type ProfileData         = z.infer<typeof ProfileDataSchema>
 export type ProfileDataApi      = z.infer<typeof ProfileDataApiSchema>

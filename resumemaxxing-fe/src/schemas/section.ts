@@ -1,1 +1,10 @@
-export type SectionType = 'education' | 'experience' | 'projects' | 'skills'
+export type SectionType =
+  | 'education'
+  | 'experience'
+  | 'projects'
+  | 'skills'
+  | 'research'
+  | 'leadership'
+  | 'volunteering'
+  | 'certifications'
+  | 'awards'

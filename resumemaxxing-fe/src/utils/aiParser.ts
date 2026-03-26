@@ -9,7 +9,7 @@ const BE_URL = import.meta.env.VITE_BE_URL ?? 'http://localhost:3000'
  * Returns a fully hydrated ProfileData with generated IDs and empty rawText fields.
  */
 export async function parseResumeWithAI(text: string): Promise<ProfileData> {
-  const res = await fetch(`${BE_URL}/parse-resume`, {
+  const res = await fetch(`${BE_URL}/parse`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -20,10 +20,15 @@ export async function parseResumeWithAI(text: string): Promise<ProfileData> {
   const raw = ProfileDataApiSchema.parse(await res.json())
 
   return {
-    contact: raw.contact,
-    education:  raw.education.map(e  => ({ ...e,  id: crypto.randomUUID(), rawText: '' })),
-    experience: raw.experience.map(e => ({ ...e,  id: crypto.randomUUID(), rawText: '' })),
-    projects:   raw.projects.map(e   => ({ ...e,  id: crypto.randomUUID(), rawText: '' })),
-    skills:     raw.skills.map(e     => ({ ...e,  id: crypto.randomUUID() })),
+    contact:        raw.contact,
+    education:      raw.education.map(e  => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    experience:     raw.experience.map(e => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    projects:       raw.projects.map(e   => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    skills:         raw.skills.map(e     => ({ ...e, id: crypto.randomUUID() })),
+    research:       [],
+    leadership:     [],
+    volunteering:   [],
+    certifications: [],
+    awards:         [],
   }
 }
