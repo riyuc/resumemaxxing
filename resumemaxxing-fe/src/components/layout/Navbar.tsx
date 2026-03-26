@@ -4,10 +4,11 @@ import BlurredButton from '@/components/ui/blurred-button'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { label: 'features', href: '/#features' },
-  { label: 'ats?',     href: '/#ats' },
-  { label: 'profile',  href: '/profile' },
-  { label: 'create',   href: '/create' },
+  { label: 'manifesto', href: '/manifesto' },
+  { label: 'features',  href: '/#features' },
+  { label: 'ats?',      href: '/#ats' },
+  { label: 'profile',   href: '/profile' },
+  { label: 'create',    href: '/create' },
 ]
 
 const Navbar = () => {

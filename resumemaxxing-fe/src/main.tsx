@@ -6,6 +6,7 @@ import AppLayout from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage'
 import ProfilePage from './pages/ProfilePage'
+import ManifestoPage from './pages/ManifestoPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<HomePage />} />
           <Route path="/create" element={<CreatePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path='/manifesto' element={<ManifestoPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

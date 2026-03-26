@@ -13,6 +13,7 @@ import AppLayout from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage'
 import ProfilePage from './pages/ProfilePage'
+import ManifestoPage from './pages/ManifestoPage'
 
 // Example: Lazy loading for better code splitting
 // import { lazy } from 'react'
@@ -42,6 +43,10 @@ export const routes: RouteObject[] = [
       {
         path: '/resume',
         element: <ProfilePage />,
+      },
+      {
+        path: '/manifesto',
+        element: <ManifestoPage />,
       },
     ],
   },
