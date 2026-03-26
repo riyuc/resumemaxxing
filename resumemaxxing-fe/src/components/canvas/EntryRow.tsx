@@ -1,0 +1,47 @@
+import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+
+export function EntryRow({
+  title, sub, date, expanded, onToggle, onEdit, onDelete, children,
+}: {
+  title: string
+  sub: string
+  date: string
+  expanded: boolean
+  onToggle: () => void
+  onEdit: () => void
+  onDelete: () => void
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="border-b border-[#0d1a2e] last:border-b-0">
+      <div className="flex items-center gap-2 px-3 py-2 group hover:bg-[#080f1e] cursor-pointer" onClick={onToggle}>
+        <div className="flex-1 min-w-0">
+          <p className="font-jetbrains text-[11px] text-[#94a3b8] font-semibold truncate">{title || '—'}</p>
+          <p className="font-jetbrains text-[10px] text-[#4a7090] truncate">
+            {sub}{date && <span className="ml-2">{date}</span>}
+          </p>
+        </div>
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <button onClick={e => { e.stopPropagation(); onEdit() }} className="text-[#456677] hover:text-[#94a3b8] cursor-pointer">
+            <Pencil size={10} />
+          </button>
+          <button onClick={e => { e.stopPropagation(); onDelete() }} className="text-[#456677] hover:text-[#ef4444] cursor-pointer">
+            <Trash2 size={10} />
+          </button>
+        </div>
+        {expanded
+          ? <ChevronUp size={10} className="text-[#2a4060] flex-shrink-0" />
+          : <ChevronDown size={10} className="text-[#2a4060] flex-shrink-0" />
+        }
+      </div>
+      <AnimatePresence>
+        {expanded && children && (
+          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
