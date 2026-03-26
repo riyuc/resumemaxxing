@@ -8,7 +8,7 @@ import Navbar from './Navbar'
  */
 const AppLayout = () => {
   return (
-    <div className="w-full flex flex-col text-white min-h-screen">
+    <div className="w-full flex flex-col text-white min-h-screen bg-[#030b18]">
       <Navbar />
       <main className="flex-1">
         <Outlet />

@@ -4,7 +4,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/modules/agentic/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun"
+    "build": "bun build src/modules/agentic/index.ts --outdir dist --target bun"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
