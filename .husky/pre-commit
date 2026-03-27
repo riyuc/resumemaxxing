@@ -1,0 +1,1 @@
+cd resumemaxxing-fe && pnpm exec lint-staged

@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+# dev — project CLI for agentic-resume
+#
+# Usage: ./dev <command>
+#   up          Install deps + start FE & BE concurrently
+#   down        Stop servers on :5173 and :3000
+#   fe          Start frontend only
+#   be          Start backend only
+#   install     Install all dependencies
+#   build       Build frontend for production
+#   lint        ESLint on FE
+#   typecheck   tsc --noEmit on FE
+# ─────────────────────────────────────────────────────────────────────────────
+set -euo pipefail
+
+# ── colors ────────────────────────────────────────────────────────────────────
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+log()  { echo -e "${BLUE}▸${NC} $*"; }
+ok()   { echo -e "${GREEN}✓${NC} $*"; }
+warn() { echo -e "${YELLOW}!${NC} $*"; }
+die()  { echo -e "${RED}✗${NC} $*" >&2; exit 1; }
+step() { echo -e "\n${BOLD}$*${NC}"; }
+
+# ── paths ─────────────────────────────────────────────────────────────────────
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+FE="$ROOT/resumemaxxing-fe"
+BE="$ROOT/resumemaxxing-be/elysiajs"
+
+# ── commands ──────────────────────────────────────────────────────────────────
+
+cmd_install() {
+  step "Installing dependencies"
+  log "Frontend (pnpm)..."
+  (cd "$FE" && pnpm install) && ok "FE deps ready"
+  log "Backend (bun)..."
+  (cd "$BE" && bun install) && ok "BE deps ready"
+}
+
+cmd_up() {
+  cmd_install
+
+  step "Starting servers"
+  log "FE → http://localhost:5173"
+  log "BE → http://localhost:3000"
+  echo ""
+
+  # Kill both if Ctrl-C or this script exits
+  trap 'echo ""; log "Shutting down..."; kill 0' SIGINT SIGTERM EXIT
+
+  (cd "$FE" && pnpm dev 2>&1 | sed "s/^/  ${BLUE}[fe]${NC} /") &
+  (cd "$BE" && bun run dev 2>&1 | sed "s/^/  ${GREEN}[be]${NC} /") &
+
+  wait
+}
+
+cmd_down() {
+  step "Stopping servers"
+  local stopped=0
+  for port in 5173 3000; do
+    local pid
+    pid=$(lsof -ti tcp:"$port" 2>/dev/null || true)
+    if [ -n "$pid" ]; then
+      kill "$pid" 2>/dev/null && ok "Stopped :$port (pid $pid)"
+      stopped=$((stopped + 1))
+    fi
+  done
+  [ "$stopped" -eq 0 ] && warn "No servers found running on :5173 or :3000"
+}
+
+cmd_build() {
+  step "Building"
+  log "Frontend..."
+  (cd "$FE" && pnpm build) && ok "Build complete → resumemaxxing-fe/dist/"
+}
+
+cmd_lint() {
+  step "Linting"
+  (cd "$FE" && pnpm lint)
+}
+
+cmd_typecheck() {
+  step "Type checking"
+  (cd "$FE" && pnpm typecheck) && ok "No type errors"
+}
+
+cmd_status() {
+  step "Server status"
+  local pairs=("FE:5173" "BE:3000")
+  for pair in "${pairs[@]}"; do
+    local label="${pair%%:*}"
+    local port="${pair##*:}"
+    local pid
+    pid=$(lsof -ti tcp:"$port" 2>/dev/null || true)
+    if [ -n "$pid" ]; then
+      ok "$label  :$port  (pid $pid)"
+    else
+      warn "$label  :$port  not running"
+    fi
+  done
+}
+
+usage() {
+  echo ""
+  echo -e "  ${BOLD}dev${NC} — agentic-resume project CLI"
+  echo ""
+  echo "  Usage: ./dev <command>"
+  echo ""
+  echo "  Commands:"
+  echo -e "    ${BOLD}up${NC}           Install deps + start FE & BE"
+  echo -e "    ${BOLD}down${NC}         Stop running servers"
+  echo -e "    ${BOLD}status${NC}       Show which servers are running"
+  echo -e "    ${BOLD}fe${NC}           Start frontend only  (Vite :5173)"
+  echo -e "    ${BOLD}be${NC}           Start backend only   (Bun :3000)"
+  echo -e "    ${BOLD}install${NC}      Install all dependencies"
+  echo -e "    ${BOLD}build${NC}        Build frontend for production"
+  echo -e "    ${BOLD}lint${NC}         Run ESLint"
+  echo -e "    ${BOLD}typecheck${NC}    Run tsc --noEmit"
+  echo ""
+}
+
+# ── dispatch ──────────────────────────────────────────────────────────────────
+case "${1:-}" in
+  up)          cmd_up ;;
+  down)        cmd_down ;;
+  status)      cmd_status ;;
+  fe)          cd "$FE" && pnpm dev ;;
+  be)          cd "$BE" && bun run dev ;;
+  install)     cmd_install ;;
+  build)       cmd_build ;;
+  lint)        cmd_lint ;;
+  typecheck)   cmd_typecheck ;;
+  *)           usage ;;
+esac
