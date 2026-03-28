@@ -1,12 +1,10 @@
-@import url('/src/assets/fonts/satoshi/satoshi.css');
-@import url('/src/assets/fonts/jetbrains_mono/jetbrains_mono.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  font-family: 'Satoshi-Variable', system-ui, sans-serif;
+  font-family: 'Satoshi', system-ui, sans-serif;
   line-height: 0.92;
   font-weight: 400;
   letter-spacing: var(--tracking-tight);
@@ -64,10 +62,9 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-
 @theme inline {
-  --font-satoshi: 'Satoshi-Variable', system-ui, sans-serif;
-  --font-jetbrains: 'JetBrainsMono-Variable', monospace;
+  --font-satoshi: 'Satoshi', system-ui, sans-serif;
+  --font-jetbrains: 'JetBrains Mono', monospace;
 
   /* Custom colors */
   --color-oxford-blue: #070f27;
@@ -155,7 +152,12 @@ button:focus-visible {
     background-color: #030b18;
     color: #c8d8f0;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-jetbrains;
   }
   p {
