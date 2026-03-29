@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { motion } from 'motion/react'
 import { FormatSlider } from '@/components/ui/format-slider'
-import { FONT_OPTIONS, DEFAULT_FORMAT } from '@/utils/profileExport'
+import { FONT_OPTIONS } from '@/utils/profileExport'
 import type { ResumeFormat } from '@/utils/profileExport'
 
 interface FormatSidebarProps {
