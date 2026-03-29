@@ -9,7 +9,7 @@ const fade = (delay = 0) => ({
 
 const HeroSection = () => {
   return (
-    <div className='grid grid-cols-2 font-jetbrains min-h-screen'>
+    <div className="grid grid-cols-2 font-jetbrains min-h-screen">
       <div className="flex flex-col gap-8 max-w-xl">
         {/* Command + response */}
         <motion.div {...fade(0)} className="flex flex-col gap-2">
@@ -27,11 +27,9 @@ const HeroSection = () => {
         {/* Title */}
         <motion.div {...fade(0.25)} className="flex flex-col gap-1.5">
           <h1 className="text-3xl font-bold text-[#e8f0fc] tracking-widest uppercase">
-            Resume-maxxing
+            Resume-maxxing,
           </h1>
-          <p className="text-xs text-[#4a7090] tracking-wider">
-            // cause it's tough out there
-          </p>
+          <p className="text-xs text-[#4a7090] tracking-wider">because i need a mf job</p>
         </motion.div>
 
         <motion.div {...fade(0.3)} className="border-t border-[#1a3050]" />
@@ -79,8 +77,8 @@ const HeroSection = () => {
       </div>
 
       {/* Right side */}
-      <motion.div 
-        className='
+      <motion.div
+        className="
           flex 
           justify-center 
           items-center 
@@ -88,10 +86,9 @@ const HeroSection = () => {
           bg-stone-100 
           p-12
           rounded-xl
-        '>
-          <div className='bg-white min-w-7'>
-
-          </div>
+        "
+      >
+        <div className="bg-white min-w-7"></div>
       </motion.div>
     </div>
   )

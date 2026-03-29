@@ -5,15 +5,15 @@ import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { label: 'manifesto', href: '/manifesto' },
-  { label: 'profile',   href: '/profile' },
-  { label: 'create',    href: '/create' },
+  { label: 'profile', href: '/profile' },
+  { label: 'create', href: '/create' },
+  { label: 'auto-create', href: '/auto-create' },
 ]
 
 const Navbar = () => {
   return (
     <nav className="w-full sticky top-0 z-50 border-b border-[#0d1a2e] bg-[#030b18]/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-
         {/* Logo + wordmark */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <MikuLogo size={42} />
@@ -24,7 +24,7 @@ const Navbar = () => {
 
         {/* Nav links */}
         <ul className="flex items-center gap-1">
-          {NAV_ITEMS.map(item => (
+          {NAV_ITEMS.map((item) => (
             <li key={item.href}>
               <NavLink
                 to={item.href}
@@ -33,7 +33,7 @@ const Navbar = () => {
                     'px-3 py-1.5 rounded-md text-xs font-jetbrains transition-colors',
                     isActive
                       ? 'text-[#c8d8f0] bg-[#0d1928]'
-                      : 'text-[#6a8aaa] hover:text-[#c8d8f0] hover:bg-[#0a1525]',
+                      : 'text-[#6a8aaa] hover:text-[#c8d8f0] hover:bg-[#0a1525]'
                   )
                 }
               >
@@ -55,7 +55,6 @@ const Navbar = () => {
             start building!
           </BlurredButton>
         </div>
-
       </div>
     </nav>
   )

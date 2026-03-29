@@ -383,7 +383,7 @@ function useResize(initial: number) {
 
 // ─── main page ────────────────────────────────────────────────────────────────
 
-export default function CreatePage() {
+export default function ManualPage() {
   const [profile, setProfile] = useState<ProfileData>(loadProfile)
   const [sections, setSections] = useState<SectionType[]>(() => {
     const stored = loadSections()

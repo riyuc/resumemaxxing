@@ -1,6 +1,6 @@
 /**
  * Route configuration file
- * 
+ *
  * Best Practice: Centralize route definitions for better maintainability
  * This makes it easier to:
  * - See all routes at a glance
@@ -11,9 +11,10 @@
 import type { RouteObject } from 'react-router'
 import AppLayout from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
-import CreatePage from './pages/CreatePage'
+import CreatePage from './pages/ManualPage'
 import ProfilePage from './pages/ProfilePage'
 import ManifestoPage from './pages/ManifestoPage'
+import AutoCreatePage from './pages/AutoCreatePage'
 
 // Example: Lazy loading for better code splitting
 // import { lazy } from 'react'
@@ -48,6 +49,10 @@ export const routes: RouteObject[] = [
         path: '/manifesto',
         element: <ManifestoPage />,
       },
+      {
+        path: '/auto-create',
+        element: <AutoCreatePage />,
+      },
     ],
   },
   // Example: Different layout for auth pages
@@ -59,4 +64,3 @@ export const routes: RouteObject[] = [
   //   ],
   // },
 ]
-
