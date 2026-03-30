@@ -11,4 +11,4 @@ export type {
   ProfileData,
   ProfileDataApi,
 } from '@/schemas/profile'
-export type {SectionType} from '@/schemas/section'
+export type { SectionType } from '@/schemas/section'

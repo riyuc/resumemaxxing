@@ -11,12 +11,7 @@ interface PageLayoutProps {
  * Can be customized per page if needed
  */
 const PageLayout = ({ children, className = '' }: PageLayoutProps) => {
-  return (
-    <div className={`flex flex-col gap-12 mt-6 ${className}`}>
-      {children}
-    </div>
-  )
+  return <div className={`flex flex-col gap-12 mt-6 ${className}`}>{children}</div>
 }
 
 export default PageLayout
-

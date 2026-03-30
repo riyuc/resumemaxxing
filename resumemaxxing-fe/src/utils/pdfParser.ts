@@ -6,7 +6,7 @@ async function getPdfjs() {
   // Use the bundled worker from the pdfjs-dist package
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
+    import.meta.url
   ).toString()
   return pdfjs
 }
@@ -59,13 +59,20 @@ function guessName(lines: string[]): string {
 
 /** Parse raw PDF text into partial ProfileData (best-effort) */
 export function parsePdfText(rawText: string): Partial<ProfileData> {
-  const allLines = rawText.split(/\n/).map(l => l.trim()).filter(Boolean)
+  const allLines = rawText
+    .split(/\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
 
   // Name
   const name = guessName(allLines)
 
   // Email, phone, linkedin, github from first ~10 lines
-  let email = '', phone = '', linkedin = '', github = '', portfolio = ''
+  let email = '',
+    phone = '',
+    linkedin = '',
+    github = '',
+    portfolio = ''
   const contactBlock = allLines.slice(0, 10).join(' ')
 
   const emailMatch = contactBlock.match(/[\w.+-]+@[\w-]+\.\w+/)
@@ -81,7 +88,11 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   if (githubMatch) github = githubMatch[1]
 
   const portfolioMatch = contactBlock.match(/https?:\/\/[\w.-]+\.\w+(?:\/[\w./?=#%-]*)*/i)
-  if (portfolioMatch && !portfolioMatch[0].includes('linkedin') && !portfolioMatch[0].includes('github')) {
+  if (
+    portfolioMatch &&
+    !portfolioMatch[0].includes('linkedin') &&
+    !portfolioMatch[0].includes('github')
+  ) {
     portfolio = portfolioMatch[0]
   }
 
@@ -90,10 +101,10 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   // Section header detection — very rough, returns the rest as rawText in each entry
   // This gives users something to work with rather than empty entries
   const SECTION_PATTERNS: Record<string, RegExp> = {
-    education:  /^(education|academic)/i,
+    education: /^(education|academic)/i,
     experience: /^(experience|work experience|employment|professional)/i,
-    projects:   /^(projects|personal projects|technical projects)/i,
-    skills:     /^(technical skills|technologies|languages)/i,
+    projects: /^(projects|personal projects|technical projects)/i,
+    skills: /^(technical skills|technologies|languages)/i,
   }
 
   const sectionRanges: Array<{ type: string; start: number }> = []
@@ -115,9 +126,10 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   }
 
   // Detect bullet lines (start with common bullet markers)
-  const isBullet = (s: string) => /^[\u2022\u25cf\u25aa\-\*]/.test(s.trim())
+  const isBullet = (s: string) => /^[\u2022\u25cf\u25aa*-]/.test(s.trim())
   // Detect date-like strings — requires a range or year span
-  const DATE_RE = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Spring|Summer|Fall|Winter|January|February|March|April|June|July|August|September|October|November|December\d{4})\b.{0,25}(\d{4}|Present|Current)\b/i
+  const DATE_RE =
+    /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Spring|Summer|Fall|Winter|January|February|March|April|June|July|August|September|October|November|December\d{4})\b.{0,25}(\d{4}|Present|Current)\b/i
   const hasDate = (s: string) => DATE_RE.test(s)
   // Split a line like "Acme Corp   Jan 2022 – May 2023" into prefix + dates
   const splitDateLine = (s: string): { prefix: string; dates: string } => {
@@ -140,17 +152,39 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   const education = (() => {
     const lines = sectionLines.education ?? []
     if (!lines.length) return []
-    const entries: { id: string; school: string; location: string; degree: string; dates: string; coursework: string; rawText: string }[] = []
-    let school = '', degree = '', location = '', dates = '', coursework = ''
+    const entries: {
+      id: string
+      school: string
+      location: string
+      degree: string
+      dates: string
+      coursework: string
+      rawText: string
+    }[] = []
+    let school = '',
+      degree = '',
+      location = '',
+      dates = '',
+      coursework = ''
     for (const line of lines) {
-      if (/relevant coursework/i.test(line)) { coursework = line.replace(/relevant coursework[:\s]*/i, ''); continue }
-      if (/^(b\.|m\.|ph\.?d|bachelor|master|honours|honor|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(line)) {
+      if (/relevant coursework/i.test(line)) {
+        coursework = line.replace(/relevant coursework[:\s]*/i, '')
+        continue
+      }
+      if (
+        /^(b\.|m\.|ph\.?d|bachelor|master|honours|honor|doctor|b\.?sc|m\.?sc|b\.?eng|m\.?eng|b\.?a|m\.?a)/i.test(
+          line
+        )
+      ) {
         const dm = SINGLE_DATE_RE.exec(line)
         if (dm && !dates) {
           // Preserve "Expected Graduation:" label in the dates field
           const gradIdx = line.search(/expected graduation[:\s]*/i)
           dates = gradIdx !== -1 ? line.slice(gradIdx).trim() : dm[0]
-          degree = line.slice(0, dm.index).replace(/\s*(?:expected graduation|graduation)[:\s]*/i, '').trim()
+          degree = line
+            .slice(0, dm.index)
+            .replace(/\s*(?:expected graduation|graduation)[:\s]*/i, '')
+            .trim()
         } else {
           degree = line
         }
@@ -159,13 +193,31 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
       if (hasDate(line)) {
         const { prefix, dates: d } = splitDateLine(line)
         dates = d
-        if (prefix && !school) { const { text, location: loc } = stripLocation(prefix); school = text; if (loc) location = loc }
+        if (prefix && !school) {
+          const { text, location: loc } = stripLocation(prefix)
+          school = text
+          if (loc) location = loc
+        }
         continue
       }
-      if (!school) { const { text, location: loc } = stripLocation(line); school = text; if (loc) location = loc; continue }
+      if (!school) {
+        const { text, location: loc } = stripLocation(line)
+        school = text
+        if (loc) location = loc
+        continue
+      }
       if (!location && line.length < 50) location = line
     }
-    if (school || degree) entries.push({ id: crypto.randomUUID(), school, location, degree, dates, coursework, rawText: '' })
+    if (school || degree)
+      entries.push({
+        id: crypto.randomUUID(),
+        school,
+        location,
+        degree,
+        dates,
+        coursework,
+        rawText: '',
+      })
     return entries
   })()
 
@@ -173,32 +225,68 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   const experience = (() => {
     const lines = sectionLines.experience ?? []
     if (!lines.length) return []
-    const entries: { id: string; company: string; location: string; role: string; dates: string; bullets: string[]; rawText: string }[] = []
-    let company = '', role = '', location = '', dates = '', bullets: string[] = []
+    const entries: {
+      id: string
+      company: string
+      location: string
+      role: string
+      dates: string
+      bullets: string[]
+      rawText: string
+    }[] = []
+    let company = '',
+      role = '',
+      location = '',
+      dates = '',
+      bullets: string[] = []
     const flush = () => {
-      if (company || role) entries.push({ id: crypto.randomUUID(), company, location, role, dates, bullets, rawText: '' })
-      company = ''; role = ''; location = ''; dates = ''; bullets = []
+      if (company || role)
+        entries.push({
+          id: crypto.randomUUID(),
+          company,
+          location,
+          role,
+          dates,
+          bullets,
+          rawText: '',
+        })
+      company = ''
+      role = ''
+      location = ''
+      dates = ''
+      bullets = []
     }
     for (const line of lines) {
       // Bullet marker — skip empty ones (bare • with no text on same line)
       if (isBullet(line)) {
-        const text = line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim()
+        const text = line.replace(/^[\u2022\u25cf\u25aa*-]\s*/, '').trim()
         if (text) bullets.push(text)
         continue
       }
       // Line containing a date range — new entry always starts with company+date in this template
       if (hasDate(line)) {
         const { prefix, dates: d } = splitDateLine(line)
-        if (prefix && company) { flush(); company = prefix; dates = d }
-        else if (prefix) { company = prefix; dates = d }
-        else { dates = d }
+        if (prefix && company) {
+          flush()
+          company = prefix
+          dates = d
+        } else if (prefix) {
+          company = prefix
+          dates = d
+        } else {
+          dates = d
+        }
         continue
       }
       // Non-bullet, non-date line
-      if (!company) { company = line; continue }
+      if (!company) {
+        company = line
+        continue
+      }
       if (!role) {
         const { text, location: loc } = stripLocation(line)
-        role = text; if (loc) location = loc
+        role = text
+        if (loc) location = loc
         continue
       }
       // company+role already set: must be bullet content (wrapped lines, missing bullet marker, etc.)
@@ -216,31 +304,60 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
   const projects = (() => {
     const lines = sectionLines.projects ?? []
     if (!lines.length) return []
-    const entries: { id: string; name: string; techStack: string; dates: string; bullets: string[]; rawText: string }[] = []
-    let name = '', techStack = '', dates = '', bullets: string[] = []
+    const entries: {
+      id: string
+      name: string
+      techStack: string
+      dates: string
+      bullets: string[]
+      rawText: string
+    }[] = []
+    let name = '',
+      techStack = '',
+      dates = '',
+      bullets: string[] = []
     const flush = () => {
-      if (name) entries.push({ id: crypto.randomUUID(), name, techStack, dates, bullets, rawText: '' })
-      name = ''; techStack = ''; dates = ''; bullets = []
+      if (name)
+        entries.push({ id: crypto.randomUUID(), name, techStack, dates, bullets, rawText: '' })
+      name = ''
+      techStack = ''
+      dates = ''
+      bullets = []
     }
     for (const line of lines) {
       if (isBullet(line)) {
-        const text = line.replace(/^[\u2022\u25cf\u25aa\-\*]\s*/, '').trim()
+        const text = line.replace(/^[\u2022\u25cf\u25aa*-]\s*/, '').trim()
         if (text) bullets.push(text)
         continue
       }
-      if (hasDate(line)) { const { prefix, dates: d } = splitDateLine(line); dates = d; if (prefix && !name) name = prefix; continue }
+      if (hasDate(line)) {
+        const { prefix, dates: d } = splitDateLine(line)
+        dates = d
+        if (prefix && !name) name = prefix
+        continue
+      }
       // Pipe-separated "Name | Tech Stack" header — only when pipe is near the start (project names are short)
       const pipeIdx = line.indexOf('|')
       if (pipeIdx > 0 && pipeIdx < 50) {
         if (name) flush()
-        name = line.slice(0, pipeIdx).trim(); techStack = line.slice(pipeIdx + 1).trim()
+        name = line.slice(0, pipeIdx).trim()
+        techStack = line.slice(pipeIdx + 1).trim()
         continue
       }
-      if (!name) { name = line; continue }
-      if (!techStack && bullets.length === 0) { techStack = line; continue }
+      if (!name) {
+        name = line
+        continue
+      }
+      if (!techStack && bullets.length === 0) {
+        techStack = line
+        continue
+      }
       // name+techStack already set: bullet content (wrapped lines or missing marker)
-      if (bullets.length > 0) { bullets[bullets.length - 1] += ' ' + line }
-      else { bullets.push(line) }
+      if (bullets.length > 0) {
+        bullets[bullets.length - 1] += ' ' + line
+      } else {
+        bullets.push(line)
+      }
     }
     flush()
     return entries
@@ -251,11 +368,15 @@ export function parsePdfText(rawText: string): Partial<ProfileData> {
     const lines = sectionLines.skills ?? []
     if (!lines.length) return []
     return lines
-      .filter(l => l.includes(':') || l.length > 3)
-      .map(l => {
+      .filter((l) => l.includes(':') || l.length > 3)
+      .map((l) => {
         const colonIdx = l.indexOf(':')
         if (colonIdx > 0 && colonIdx < 30) {
-          return { id: crypto.randomUUID(), category: l.slice(0, colonIdx).trim(), technologies: l.slice(colonIdx + 1).trim() }
+          return {
+            id: crypto.randomUUID(),
+            category: l.slice(0, colonIdx).trim(),
+            technologies: l.slice(colonIdx + 1).trim(),
+          }
         }
         return { id: crypto.randomUUID(), category: 'Skills', technologies: l }
       })

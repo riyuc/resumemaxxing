@@ -20,15 +20,15 @@ export async function parseResumeWithAI(text: string): Promise<ProfileData> {
   const raw = ProfileDataApiSchema.parse(await res.json())
 
   return {
-    contact:        raw.contact,
-    education:      raw.education.map(e  => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
-    experience:     raw.experience.map(e => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
-    projects:       raw.projects.map(e   => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
-    skills:         raw.skills.map(e     => ({ ...e, id: crypto.randomUUID() })),
-    research:       [],
-    leadership:     [],
-    volunteering:   [],
+    contact: raw.contact,
+    education: raw.education.map((e) => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    experience: raw.experience.map((e) => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    projects: raw.projects.map((e) => ({ ...e, id: crypto.randomUUID(), rawText: '' })),
+    skills: raw.skills.map((e) => ({ ...e, id: crypto.randomUUID() })),
+    research: [],
+    leadership: [],
+    volunteering: [],
     certifications: [],
-    awards:         [],
+    awards: [],
   }
 }

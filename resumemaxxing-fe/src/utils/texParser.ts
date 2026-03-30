@@ -1,9 +1,15 @@
-import type { ProfileData, EducationEntry, ExperienceEntry, ProjectEntry, SkillsEntry } from '@/types/profile'
+import type {
+  ProfileData,
+  EducationEntry,
+  ExperienceEntry,
+  ProjectEntry,
+  SkillsEntry,
+} from '@/types/profile'
 
 function removeTexComments(tex: string): string {
   return tex
     .split('\n')
-    .map(line => {
+    .map((line) => {
       const idx = line.search(/(?<!\\)%/)
       return idx >= 0 ? line.slice(0, idx) : line
     })
@@ -88,7 +94,10 @@ function extractBullets(content: string): string[] {
     }
 
     const result = extractNextBraceGroup(content, afterCmd)
-    if (!result) { searchFrom = cmdIdx + 1; continue }
+    if (!result) {
+      searchFrom = cmdIdx + 1
+      continue
+    }
 
     const text = stripLatex(result.content)
     if (text) bullets.push(text)
@@ -109,7 +118,10 @@ function parseEducation(content: string): EducationEntry[] {
     if (cmdIdx === -1) break
 
     const { args, end } = extractNArgs(content, cmdIdx + cmd.length, 4)
-    if (args.length < 4) { searchFrom = cmdIdx + 1; continue }
+    if (args.length < 4) {
+      searchFrom = cmdIdx + 1
+      continue
+    }
 
     const [school, location, degree, dates] = args.map(stripLatex)
 
@@ -124,7 +136,15 @@ function parseEducation(content: string): EducationEntry[] {
       if (subItemResult) coursework = stripLatex(subItemResult.content)
     }
 
-    entries.push({ id: crypto.randomUUID(), school, location, degree, dates, coursework, rawText: '' })
+    entries.push({
+      id: crypto.randomUUID(),
+      school,
+      location,
+      degree,
+      dates,
+      coursework,
+      rawText: '',
+    })
     searchFrom = nextCmdIdx >= 0 ? nextCmdIdx : content.length
   }
 
@@ -141,7 +161,10 @@ function parseExperience(content: string): ExperienceEntry[] {
     if (cmdIdx === -1) break
 
     const { args, end } = extractNArgs(content, cmdIdx + cmd.length, 4)
-    if (args.length < 4) { searchFrom = cmdIdx + 1; continue }
+    if (args.length < 4) {
+      searchFrom = cmdIdx + 1
+      continue
+    }
 
     const [company, dates, role, location] = args.map(stripLatex)
 
@@ -175,7 +198,10 @@ function parseProjects(content: string): ProjectEntry[] {
     const headerLine = content.slice(linePos, lineEnd >= 0 ? lineEnd : undefined)
     const end = lineEnd >= 0 ? lineEnd : content.length
 
-    if (!headerLine.trim()) { searchFrom = cmdIdx + 1; continue }
+    if (!headerLine.trim()) {
+      searchFrom = cmdIdx + 1
+      continue
+    }
 
     // Also try to grab a second arg (dates) via brace extraction if the header closed properly
     const { args: dateArgs } = extractNArgs(content, cmdIdx + cmd.length, 2)
@@ -192,7 +218,10 @@ function parseProjects(content: string): ProjectEntry[] {
       name = cleanHeader.replace(/[{}]/g, '').trim()
     }
 
-    if (!name) { searchFrom = cmdIdx + 1; continue }
+    if (!name) {
+      searchFrom = cmdIdx + 1
+      continue
+    }
 
     const nextCmdIdx = content.indexOf(cmd, end)
     const entryContent = content.slice(end, nextCmdIdx >= 0 ? nextCmdIdx : undefined)
@@ -230,14 +259,21 @@ export function parseTexResume(tex: string): ProfileData {
 
   const result: ProfileData = {
     contact: { name: '', phone: '', email: '', linkedin: '', github: '', portfolio: '' },
-    education: [], experience: [], projects: [], skills: [],
-    research: [], leadership: [], volunteering: [], certifications: [], awards: [],
+    education: [],
+    experience: [],
+    projects: [],
+    skills: [],
+    research: [],
+    leadership: [],
+    volunteering: [],
+    certifications: [],
+    awards: [],
   }
 
   const nameMatch = cleaned.match(/\\textbf\{\\Huge\s+\\scshape\s+([^}]+)\}/)
   if (nameMatch) result.contact.name = nameMatch[1].trim()
 
-  const phoneMatch = cleaned.match(/\\small\s+([+\d\s()\-]+)\s*\$\s*\|\s*\$/)
+  const phoneMatch = cleaned.match(/\\small\s+([+\d\s()-]+)\s*\$\s*\|\s*\$/)
   if (phoneMatch) result.contact.phone = phoneMatch[1].trim()
 
   const emailMatch = cleaned.match(/\\href\{mailto:([^}]+)\}/)
@@ -267,11 +303,19 @@ export function parseTexResume(tex: string): ProfileData {
     // Fuzzy matching — handles common variants like "Work Experience", "Skills", "Technologies", etc.
     if (sectionName.includes('education') || sectionName.includes('academic')) {
       result.education = parseEducation(sectionContent)
-    } else if (sectionName.includes('experience') || sectionName.includes('employment') || sectionName.includes('work history')) {
+    } else if (
+      sectionName.includes('experience') ||
+      sectionName.includes('employment') ||
+      sectionName.includes('work history')
+    ) {
       result.experience = parseExperience(sectionContent)
     } else if (sectionName.includes('project')) {
       result.projects = parseProjects(sectionContent)
-    } else if (sectionName.includes('skill') || sectionName.includes('technolog') || sectionName.includes('tool')) {
+    } else if (
+      sectionName.includes('skill') ||
+      sectionName.includes('technolog') ||
+      sectionName.includes('tool')
+    ) {
       result.skills = parseSkills(sectionContent)
     }
   }

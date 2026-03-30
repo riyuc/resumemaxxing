@@ -1,11 +1,13 @@
 type HoverRevealTextProp = {
-  text: String,
-  className?: String,
+  text: string
+  className?: string
 }
 
-const HoverRevealText = ({ text, className } : HoverRevealTextProp) => {
+const HoverRevealText = ({ text, className }: HoverRevealTextProp) => {
   return (
-    <span className={`
+    <span
+      className={
+        `
       group/blur 
       blur-sm filter transition-all 
       duration-moderate-02 
@@ -20,8 +22,11 @@ const HoverRevealText = ({ text, className } : HoverRevealTextProp) => {
       text-sm
       italic
       font-satoshi
-    ` + {className}}>
-    {' '} {text}
+    ` + { className }
+      }
+    >
+      {' '}
+      {text}
     </span>
   )
 }
