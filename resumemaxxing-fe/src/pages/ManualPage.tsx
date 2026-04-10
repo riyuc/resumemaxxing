@@ -30,6 +30,7 @@ import { ProjectForm } from '@/components/forms/ProjectForm'
 import { SkillsForm } from '@/components/forms/SkillsForm'
 import { ProfileDataSchema } from '@/schemas/profile'
 import { useManualCrud } from '@/hooks/useManualCrud'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { ContactPanel } from '@/components/manual/ContactPanel'
 import { SectionBlock } from '@/components/manual/SectionBlock'
 import { EntryListItem } from '@/components/manual/EntryListItem'
@@ -232,6 +233,9 @@ export default function ManualPage() {
   const [showSectionPicker, setShowSectionPicker] = useState(false)
   // live contact draft for preview
   const [contactLiveDraft, setContactLiveDraft] = useState<ProfileData['contact'] | null>(null)
+  // mobile tab
+  const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
+  const isMobile = useIsMobile()
 
   const texRef = useRef<HTMLInputElement>(null)
   const pdfRef = useRef<HTMLInputElement>(null)
@@ -449,510 +453,539 @@ export default function ManualPage() {
 
   // ── render ──
   return (
-    <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
-      {/* ══ LEFT PANEL ══ */}
-      <div
-        className="shrink-0 border-r border-[#0d1a2e] bg-[#030b18] overflow-hidden"
-        style={{ width: sidebarOpen ? leftWidth : 46 }}
-      >
-        {sidebarOpen ? (
-          <div className="overflow-y-auto h-full">
-            <div className="px-5 py-5 flex flex-col gap-6">
-              {/* header */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs shrink-0">
-                  <TerminalSquare size={13} className="text-payne-gray" />
-                  <span className="text-payne-gray">~/</span>
-                  <span className="text-[#c8d8f0]">profile</span>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap justify-end">
-                  <AnimatePresence>
-                    {importStatus !== 'idle' && (
-                      <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className={cn(
-                          'text-[11px] font-jetbrains shrink-0',
-                          importStatus === 'success' ? 'text-[#4ade80]' : 'text-[#ef4444]'
-                        )}
-                      >
-                        {importStatus === 'success' ? '✓ imported' : '✗ error'}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                  {pdfImporting && (
-                    <span className="text-[11px] text-[#4a7090] font-jetbrains animate-pulse">
-                      parsing...
-                    </span>
-                  )}
-                  <DropdownBtn label="import" icon={<Upload size={11} />} align="right">
-                    <DropItem onClick={() => texRef.current?.click()}>
-                      <FileText size={12} className="text-payne-gray" /> .tex file
-                    </DropItem>
-                    <DropItem onClick={() => pdfRef.current?.click()}>
-                      <FileText size={12} className="text-payne-gray" /> .pdf file
-                    </DropItem>
-                  </DropdownBtn>
-                  <input
-                    ref={texRef}
-                    type="file"
-                    accept=".tex"
-                    className="hidden"
-                    onChange={handleTexImport}
-                  />
-                  <input
-                    ref={pdfRef}
-                    type="file"
-                    accept=".pdf"
-                    className="hidden"
-                    onChange={handlePdfImport}
-                  />
-                  <button
-                    onClick={() => setSidebarOpen(false)}
-                    className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1"
-                  >
-                    <ChevronLeft size={13} />
-                  </button>
-                </div>
-              </div>
+    <div className="flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
+      {/* Mobile tab bar */}
+      <div className="md:hidden flex border-b border-[#0d1a2e] shrink-0 bg-[#08132a]">
+        {(['editor', 'preview'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setMobileTab(tab)}
+            className={cn(
+              'flex-1 py-2.5 font-jetbrains text-[11px] transition-colors cursor-pointer',
+              mobileTab === tab
+                ? 'text-[#c8d8f0] border-b-2 border-payne-gray'
+                : 'text-[#4a7090] hover:text-[#6a8aaa]'
+            )}
+          >
+            ~/{tab}
+          </button>
+        ))}
+      </div>
 
-              {/* contact */}
-              <ContactPanel
-                contact={profile.contact}
-                onSave={(c) => setProfile((p) => ({ ...p, contact: c }))}
-                onDraftChange={setContactLiveDraft}
-              />
-
-              {/* sections */}
-              <div className="flex flex-col gap-6">
-                <AnimatePresence>
-                  {sections.map((sectionType) => {
-                    const isAdding = addingIn === sectionType
-                    const editId = eId(sectionType)
-                    const ph = SECTION_PLACEHOLDER[sectionType] ?? ''
-                    const setRawText = (
-                      key: 'education' | 'experience' | 'projects',
-                      id: string,
-                      v: string
-                    ) =>
-                      setProfile((p) => ({
-                        ...p,
-                        [key]: (p[key] as Array<{ id: string; rawText?: string }>).map((e) =>
-                          e.id === id ? { ...e, rawText: v } : e
-                        ),
-                      }))
-
-                    const addFormNode = (
-                      <>
-                        {sectionType === 'education' && (
-                          <EducationForm
-                            onSave={addEducation}
-                            onCancel={cancelAdd}
-                            onChange={(d) =>
-                              setDraftEntry({ sectionType: 'education', id: null, data: d })
-                            }
-                          />
-                        )}
-                        {sectionType === 'experience' && (
-                          <ExperienceForm
-                            onSave={addExperience}
-                            onCancel={cancelAdd}
-                            onChange={(d) =>
-                              setDraftEntry({ sectionType: 'experience', id: null, data: d })
-                            }
-                          />
-                        )}
-                        {sectionType === 'projects' && (
-                          <ProjectForm
-                            onSave={addProject}
-                            onCancel={cancelAdd}
-                            onChange={(d) =>
-                              setDraftEntry({ sectionType: 'projects', id: null, data: d })
-                            }
-                          />
-                        )}
-                        {sectionType === 'skills' && (
-                          <SkillsForm
-                            onSave={addSkill}
-                            onCancel={cancelAdd}
-                            onChange={(d) =>
-                              setDraftEntry({ sectionType: 'skills', id: null, data: d })
-                            }
-                          />
-                        )}
-                      </>
-                    )
-
-                    return (
-                      <SectionBlock
-                        key={sectionType}
-                        type={sectionType}
-                        isAdding={isAdding}
-                        onToggleAdding={() => {
-                          setAddingIn(isAdding ? null : sectionType)
-                          setEditingEntry(null)
-                          setDraftEntry(null)
-                        }}
-                        onRemove={() => removeSection(sectionType)}
-                        addForm={addFormNode}
-                        isEmpty={(profile[sectionType] as unknown[]).length === 0}
-                      >
-                        {/* education */}
-                        {sectionType === 'education' &&
-                          profile.education.map((entry) => (
-                            <EntryListItem
-                              key={entry.id}
-                              entryId={entry.id}
-                              expanded={expandedIds.has(entry.id)}
-                              isEditing={editId === entry.id}
-                              onToggle={() => toggleExpand(entry.id)}
-                              onStartEdit={() => startEdit(entry.id, 'education')}
-                              onCancelEdit={cancelEdit}
-                              onDelete={() => deleteEducation(entry.id)}
-                              summary={
-                                <EntrySum
-                                  title={entry.school}
-                                  sub={`${entry.degree}${entry.location ? ` · ${entry.location}` : ''}`}
-                                  date={entry.dates}
-                                />
-                              }
-                              editForm={
-                                <EducationForm
-                                  initial={entry}
-                                  onSave={addEducation}
-                                  onCancel={cancelEdit}
-                                  onChange={(d) =>
-                                    setDraftEntry({
-                                      sectionType: 'education',
-                                      id: entry.id,
-                                      data: d,
-                                    })
-                                  }
-                                />
-                              }
-                              viewContent={
-                                <EntryViewContent
-                                  bullets={[]}
-                                  rawText={entry.rawText ?? ''}
-                                  placeholder={ph}
-                                  onRawChange={(v) => setRawText('education', entry.id, v)}
-                                />
-                              }
-                            />
-                          ))}
-
-                        {/* experience */}
-                        {sectionType === 'experience' &&
-                          (profile.experience as ExperienceEntry[]).map((entry) => (
-                            <EntryListItem
-                              key={entry.id}
-                              entryId={entry.id}
-                              expanded={expandedIds.has(entry.id)}
-                              isEditing={editId === entry.id}
-                              onToggle={() => toggleExpand(entry.id)}
-                              onStartEdit={() => startEdit(entry.id, 'experience')}
-                              onCancelEdit={cancelEdit}
-                              onDelete={() => deleteExperience(entry.id)}
-                              summary={
-                                <EntrySum
-                                  title={entry.company}
-                                  sub={entry.role}
-                                  date={entry.dates}
-                                />
-                              }
-                              editForm={
-                                <ExperienceForm
-                                  initial={entry}
-                                  onSave={addExperience}
-                                  onCancel={cancelEdit}
-                                  onChange={(d) =>
-                                    setDraftEntry({
-                                      sectionType: 'experience',
-                                      id: entry.id,
-                                      data: d,
-                                    })
-                                  }
-                                />
-                              }
-                              viewContent={
-                                <EntryViewContent
-                                  bullets={entry.bullets ?? []}
-                                  rawText={entry.rawText ?? ''}
-                                  placeholder={ph}
-                                  onRawChange={(v) => setRawText('experience', entry.id, v)}
-                                />
-                              }
-                            />
-                          ))}
-
-                        {/* projects */}
-                        {sectionType === 'projects' &&
-                          (profile.projects as ProjectEntry[]).map((entry) => (
-                            <EntryListItem
-                              key={entry.id}
-                              entryId={entry.id}
-                              expanded={expandedIds.has(entry.id)}
-                              isEditing={editId === entry.id}
-                              onToggle={() => toggleExpand(entry.id)}
-                              onStartEdit={() => startEdit(entry.id, 'projects')}
-                              onCancelEdit={cancelEdit}
-                              onDelete={() => deleteProject(entry.id)}
-                              summary={
-                                <EntrySum
-                                  title={entry.name}
-                                  sub={entry.techStack}
-                                  date={entry.dates}
-                                />
-                              }
-                              editForm={
-                                <ProjectForm
-                                  initial={entry}
-                                  onSave={addProject}
-                                  onCancel={cancelEdit}
-                                  onChange={(d) =>
-                                    setDraftEntry({
-                                      sectionType: 'projects',
-                                      id: entry.id,
-                                      data: d,
-                                    })
-                                  }
-                                />
-                              }
-                              viewContent={
-                                <EntryViewContent
-                                  bullets={entry.bullets ?? []}
-                                  rawText={entry.rawText ?? ''}
-                                  placeholder={ph}
-                                  onRawChange={(v) => setRawText('projects', entry.id, v)}
-                                />
-                              }
-                            />
-                          ))}
-
-                        {/* skills — flat list */}
-                        {sectionType === 'skills' && (
-                          <div className="flex flex-col gap-1">
-                            {profile.skills.map((entry) => (
-                              <div
-                                key={entry.id}
-                                className="group flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#0c1a38] transition-colors"
-                              >
-                                {editId === entry.id ? (
-                                  <div className="w-full">
-                                    <SkillsForm
-                                      initial={entry}
-                                      onSave={addSkill}
-                                      onCancel={cancelEdit}
-                                      onChange={(d) =>
-                                        setDraftEntry({
-                                          sectionType: 'skills',
-                                          id: entry.id,
-                                          data: d,
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div>
-                                      <p className="text-xs font-semibold text-[#94a3b8]">
-                                        {entry.category || '—'}
-                                      </p>
-                                      <p className="text-[11px] text-[#4a7090] mt-0.5">
-                                        {entry.technologies}
-                                      </p>
-                                    </div>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <PillBtn
-                                        variant="ghost"
-                                        onClick={() => startEdit(entry.id, 'skills')}
-                                      >
-                                        edit
-                                      </PillBtn>
-                                      <PillBtn
-                                        variant="danger"
-                                        onClick={() => deleteSkill(entry.id)}
-                                      >
-                                        del
-                                      </PillBtn>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </SectionBlock>
-                    )
-                  })}
-                </AnimatePresence>
-              </div>
-
-              {/* add section picker */}
-              {availableSections.length > 0 && (
-                <div className="flex justify-center pb-6">
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowSectionPicker((p) => !p)}
-                      className={cn(
-                        'flex items-center gap-2 px-5 py-2 rounded-full text-xs font-jetbrains border border-dashed transition-all cursor-pointer',
-                        showSectionPicker
-                          ? 'border-payne-gray text-porcelain bg-[#08132a]'
-                          : 'border-[#1a3050] text-[#4a7090] hover:border-payne-gray hover:text-[#94a3b8]'
-                      )}
-                    >
-                      + add section
-                    </button>
+      <div className="flex flex-1 overflow-hidden">
+        {/* ══ LEFT PANEL ══ */}
+        <div
+          className={cn(
+            'shrink-0 border-r border-[#0d1a2e] bg-[#030b18] overflow-hidden',
+            mobileTab === 'editor' ? 'flex flex-col w-full md:w-auto' : 'hidden md:flex md:flex-col'
+          )}
+          style={!isMobile ? { width: sidebarOpen ? leftWidth : 46 } : undefined}
+        >
+          {sidebarOpen ? (
+            <div className="overflow-y-auto h-full">
+              <div className="px-5 py-5 flex flex-col gap-6">
+                {/* header */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs shrink-0">
+                    <TerminalSquare size={13} className="text-payne-gray" />
+                    <span className="text-payne-gray">~/</span>
+                    <span className="text-[#c8d8f0]">profile</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
                     <AnimatePresence>
-                      {showSectionPicker && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -4, scale: 0.97 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                          className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#08132a] border border-[#1a3050] rounded-xl overflow-hidden shadow-xl z-10 min-w-[140px]"
+                      {importStatus !== 'idle' && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className={cn(
+                            'text-[11px] font-jetbrains shrink-0',
+                            importStatus === 'success' ? 'text-[#4ade80]' : 'text-[#ef4444]'
+                          )}
                         >
-                          {availableSections.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => addSection(s)}
-                              className="flex items-center gap-2 w-full px-4 py-2.5 text-xs text-[#94a3b8] hover:bg-[#0c1a38] hover:text-porcelain transition-colors cursor-pointer capitalize"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </motion.div>
+                          {importStatus === 'success' ? '✓ imported' : '✗ error'}
+                        </motion.span>
                       )}
                     </AnimatePresence>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center py-5 gap-4 h-full">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-[#0c1a38]"
-            >
-              <PanelLeftOpen size={14} />
-            </button>
-            <span className="text-[10px] text-[#4a7090] font-jetbrains [writing-mode:vertical-rl] tracking-widest rotate-180 mt-2">
-              profile
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ══ RESIZE HANDLE ══ */}
-      {sidebarOpen && (
-        <div
-          onMouseDown={onDividerMouseDown}
-          className="w-1 shrink-0 bg-[#0d1a2e] hover:bg-payne-gray/40 active:bg-payne-gray/70 transition-colors cursor-col-resize"
-        />
-      )}
-
-      {/* ══ RIGHT PANEL ══ */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#060e20] min-w-0">
-        {/* toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#0d1a2e] shrink-0">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-payne-gray">~/</span>
-            <span className="text-[#c8d8f0]">preview</span>
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse ml-1"
-              title="live"
-            />
-            <span className="text-[11px] font-jetbrains ml-1 text-[#4a7090]">
-              {pageCount} {pageCount === 1 ? 'page' : 'pages'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <DropdownBtn label="export" icon={<Download size={11} />} align="right">
-              <DropItem onClick={handleExportTex}>
-                <FileText size={12} className="text-payne-gray" /> download .tex
-              </DropItem>
-              <DropItem onClick={handleExportMd}>
-                <FileText size={12} className="text-payne-gray" /> download .md
-              </DropItem>
-            </DropdownBtn>
-            <PillBtn
-              variant={editMode ? 'accent' : 'default'}
-              onClick={() => {
-                const next = !editMode
-                setEditMode(next)
-                setIframeEditing(false)
-                if (next) {
-                  setSidebarOpen(false)
-                  setFormatOpen(true)
-                } else {
-                  setFormatOpen(false)
-                }
-              }}
-            >
-              <SquarePen size={11} /> {editMode ? 'editing' : 'edit in preview'}
-            </PillBtn>
-            <PillBtn variant="default" onClick={openPdfPreview}>
-              <Printer size={11} /> PDF preview
-            </PillBtn>
-          </div>
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* preview scroll */}
-          <div className="flex-1 overflow-y-auto p-6 min-w-0 bg-[#030b18]">
-            <div className="flex flex-col items-center gap-6 max-w-[820px] mx-auto pb-6">
-              {Array.from({ length: pageCount }, (_, i) => (
-                <div
-                  key={i}
-                  className="w-full shadow-2xl rounded shrink-0 bg-white"
-                  style={{ height: 1056 }}
-                >
-                  {i > 0 && <div style={{ height: marginPx }} />}
-                  <div
-                    style={{
-                      height: i === 0 ? marginPx + contentPerPage : contentPerPage,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <iframe
-                      ref={i === 0 ? iframeRef : undefined}
-                      srcDoc={resumeHtmlFinal}
-                      title={`Resume Page ${i + 1}`}
-                      sandbox="allow-scripts allow-same-origin"
-                      className={cn(
-                        'w-full border-0 overflow-hidden bg-white block',
-                        i === 0 && editMode && 'cursor-pointer'
-                      )}
-                      style={{
-                        height: Math.max(contentHeight || contentPerPage, contentPerPage),
-                        transform: `translateY(-${i === 0 ? 0 : marginPx + i * contentPerPage}px)`,
-                        marginBottom: `-${i === 0 ? 0 : marginPx + i * contentPerPage}px`,
-                      }}
+                    {pdfImporting && (
+                      <span className="text-[11px] text-[#4a7090] font-jetbrains animate-pulse">
+                        parsing...
+                      </span>
+                    )}
+                    <DropdownBtn label="import" icon={<Upload size={11} />} align="right">
+                      <DropItem onClick={() => texRef.current?.click()}>
+                        <FileText size={12} className="text-payne-gray" /> .tex file
+                      </DropItem>
+                      <DropItem onClick={() => pdfRef.current?.click()}>
+                        <FileText size={12} className="text-payne-gray" /> .pdf file
+                      </DropItem>
+                    </DropdownBtn>
+                    <input
+                      ref={texRef}
+                      type="file"
+                      accept=".tex"
+                      className="hidden"
+                      onChange={handleTexImport}
                     />
+                    <input
+                      ref={pdfRef}
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={handlePdfImport}
+                    />
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1"
+                    >
+                      <ChevronLeft size={13} />
+                    </button>
                   </div>
-                  <div style={{ height: marginPx }} />
                 </div>
-              ))}
+
+                {/* contact */}
+                <ContactPanel
+                  contact={profile.contact}
+                  onSave={(c) => setProfile((p) => ({ ...p, contact: c }))}
+                  onDraftChange={setContactLiveDraft}
+                />
+
+                {/* sections */}
+                <div className="flex flex-col gap-6">
+                  <AnimatePresence>
+                    {sections.map((sectionType) => {
+                      const isAdding = addingIn === sectionType
+                      const editId = eId(sectionType)
+                      const ph = SECTION_PLACEHOLDER[sectionType] ?? ''
+                      const setRawText = (
+                        key: 'education' | 'experience' | 'projects',
+                        id: string,
+                        v: string
+                      ) =>
+                        setProfile((p) => ({
+                          ...p,
+                          [key]: (p[key] as Array<{ id: string; rawText?: string }>).map((e) =>
+                            e.id === id ? { ...e, rawText: v } : e
+                          ),
+                        }))
+
+                      const addFormNode = (
+                        <>
+                          {sectionType === 'education' && (
+                            <EducationForm
+                              onSave={addEducation}
+                              onCancel={cancelAdd}
+                              onChange={(d) =>
+                                setDraftEntry({ sectionType: 'education', id: null, data: d })
+                              }
+                            />
+                          )}
+                          {sectionType === 'experience' && (
+                            <ExperienceForm
+                              onSave={addExperience}
+                              onCancel={cancelAdd}
+                              onChange={(d) =>
+                                setDraftEntry({ sectionType: 'experience', id: null, data: d })
+                              }
+                            />
+                          )}
+                          {sectionType === 'projects' && (
+                            <ProjectForm
+                              onSave={addProject}
+                              onCancel={cancelAdd}
+                              onChange={(d) =>
+                                setDraftEntry({ sectionType: 'projects', id: null, data: d })
+                              }
+                            />
+                          )}
+                          {sectionType === 'skills' && (
+                            <SkillsForm
+                              onSave={addSkill}
+                              onCancel={cancelAdd}
+                              onChange={(d) =>
+                                setDraftEntry({ sectionType: 'skills', id: null, data: d })
+                              }
+                            />
+                          )}
+                        </>
+                      )
+
+                      return (
+                        <SectionBlock
+                          key={sectionType}
+                          type={sectionType}
+                          isAdding={isAdding}
+                          onToggleAdding={() => {
+                            setAddingIn(isAdding ? null : sectionType)
+                            setEditingEntry(null)
+                            setDraftEntry(null)
+                          }}
+                          onRemove={() => removeSection(sectionType)}
+                          addForm={addFormNode}
+                          isEmpty={(profile[sectionType] as unknown[]).length === 0}
+                        >
+                          {/* education */}
+                          {sectionType === 'education' &&
+                            profile.education.map((entry) => (
+                              <EntryListItem
+                                key={entry.id}
+                                entryId={entry.id}
+                                expanded={expandedIds.has(entry.id)}
+                                isEditing={editId === entry.id}
+                                onToggle={() => toggleExpand(entry.id)}
+                                onStartEdit={() => startEdit(entry.id, 'education')}
+                                onCancelEdit={cancelEdit}
+                                onDelete={() => deleteEducation(entry.id)}
+                                summary={
+                                  <EntrySum
+                                    title={entry.school}
+                                    sub={`${entry.degree}${entry.location ? ` · ${entry.location}` : ''}`}
+                                    date={entry.dates}
+                                  />
+                                }
+                                editForm={
+                                  <EducationForm
+                                    initial={entry}
+                                    onSave={addEducation}
+                                    onCancel={cancelEdit}
+                                    onChange={(d) =>
+                                      setDraftEntry({
+                                        sectionType: 'education',
+                                        id: entry.id,
+                                        data: d,
+                                      })
+                                    }
+                                  />
+                                }
+                                viewContent={
+                                  <EntryViewContent
+                                    bullets={[]}
+                                    rawText={entry.rawText ?? ''}
+                                    placeholder={ph}
+                                    onRawChange={(v) => setRawText('education', entry.id, v)}
+                                  />
+                                }
+                              />
+                            ))}
+
+                          {/* experience */}
+                          {sectionType === 'experience' &&
+                            (profile.experience as ExperienceEntry[]).map((entry) => (
+                              <EntryListItem
+                                key={entry.id}
+                                entryId={entry.id}
+                                expanded={expandedIds.has(entry.id)}
+                                isEditing={editId === entry.id}
+                                onToggle={() => toggleExpand(entry.id)}
+                                onStartEdit={() => startEdit(entry.id, 'experience')}
+                                onCancelEdit={cancelEdit}
+                                onDelete={() => deleteExperience(entry.id)}
+                                summary={
+                                  <EntrySum
+                                    title={entry.company}
+                                    sub={entry.role}
+                                    date={entry.dates}
+                                  />
+                                }
+                                editForm={
+                                  <ExperienceForm
+                                    initial={entry}
+                                    onSave={addExperience}
+                                    onCancel={cancelEdit}
+                                    onChange={(d) =>
+                                      setDraftEntry({
+                                        sectionType: 'experience',
+                                        id: entry.id,
+                                        data: d,
+                                      })
+                                    }
+                                  />
+                                }
+                                viewContent={
+                                  <EntryViewContent
+                                    bullets={entry.bullets ?? []}
+                                    rawText={entry.rawText ?? ''}
+                                    placeholder={ph}
+                                    onRawChange={(v) => setRawText('experience', entry.id, v)}
+                                  />
+                                }
+                              />
+                            ))}
+
+                          {/* projects */}
+                          {sectionType === 'projects' &&
+                            (profile.projects as ProjectEntry[]).map((entry) => (
+                              <EntryListItem
+                                key={entry.id}
+                                entryId={entry.id}
+                                expanded={expandedIds.has(entry.id)}
+                                isEditing={editId === entry.id}
+                                onToggle={() => toggleExpand(entry.id)}
+                                onStartEdit={() => startEdit(entry.id, 'projects')}
+                                onCancelEdit={cancelEdit}
+                                onDelete={() => deleteProject(entry.id)}
+                                summary={
+                                  <EntrySum
+                                    title={entry.name}
+                                    sub={entry.techStack}
+                                    date={entry.dates}
+                                  />
+                                }
+                                editForm={
+                                  <ProjectForm
+                                    initial={entry}
+                                    onSave={addProject}
+                                    onCancel={cancelEdit}
+                                    onChange={(d) =>
+                                      setDraftEntry({
+                                        sectionType: 'projects',
+                                        id: entry.id,
+                                        data: d,
+                                      })
+                                    }
+                                  />
+                                }
+                                viewContent={
+                                  <EntryViewContent
+                                    bullets={entry.bullets ?? []}
+                                    rawText={entry.rawText ?? ''}
+                                    placeholder={ph}
+                                    onRawChange={(v) => setRawText('projects', entry.id, v)}
+                                  />
+                                }
+                              />
+                            ))}
+
+                          {/* skills — flat list */}
+                          {sectionType === 'skills' && (
+                            <div className="flex flex-col gap-1">
+                              {profile.skills.map((entry) => (
+                                <div
+                                  key={entry.id}
+                                  className="group flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#0c1a38] transition-colors"
+                                >
+                                  {editId === entry.id ? (
+                                    <div className="w-full">
+                                      <SkillsForm
+                                        initial={entry}
+                                        onSave={addSkill}
+                                        onCancel={cancelEdit}
+                                        onChange={(d) =>
+                                          setDraftEntry({
+                                            sectionType: 'skills',
+                                            id: entry.id,
+                                            data: d,
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div>
+                                        <p className="text-xs font-semibold text-[#94a3b8]">
+                                          {entry.category || '—'}
+                                        </p>
+                                        <p className="text-[11px] text-[#4a7090] mt-0.5">
+                                          {entry.technologies}
+                                        </p>
+                                      </div>
+                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <PillBtn
+                                          variant="ghost"
+                                          onClick={() => startEdit(entry.id, 'skills')}
+                                        >
+                                          edit
+                                        </PillBtn>
+                                        <PillBtn
+                                          variant="danger"
+                                          onClick={() => deleteSkill(entry.id)}
+                                        >
+                                          del
+                                        </PillBtn>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </SectionBlock>
+                      )
+                    })}
+                  </AnimatePresence>
+                </div>
+
+                {/* add section picker */}
+                {availableSections.length > 0 && (
+                  <div className="flex justify-center pb-6">
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowSectionPicker((p) => !p)}
+                        className={cn(
+                          'flex items-center gap-2 px-5 py-2 rounded-full text-xs font-jetbrains border border-dashed transition-all cursor-pointer',
+                          showSectionPicker
+                            ? 'border-payne-gray text-porcelain bg-[#08132a]'
+                            : 'border-[#1a3050] text-[#4a7090] hover:border-payne-gray hover:text-[#94a3b8]'
+                        )}
+                      >
+                        + add section
+                      </button>
+                      <AnimatePresence>
+                        {showSectionPicker && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#08132a] border border-[#1a3050] rounded-xl overflow-hidden shadow-xl z-10 min-w-[140px]"
+                          >
+                            {availableSections.map((s) => (
+                              <button
+                                key={s}
+                                onClick={() => addSection(s)}
+                                className="flex items-center gap-2 w-full px-4 py-2.5 text-xs text-[#94a3b8] hover:bg-[#0c1a38] hover:text-porcelain transition-colors cursor-pointer capitalize"
+                              >
+                                {s}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center py-5 gap-4 h-full">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="text-[#4a7090] hover:text-[#94a3b8] transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-[#0c1a38]"
+              >
+                <PanelLeftOpen size={14} />
+              </button>
+              <span className="text-[10px] text-[#4a7090] font-jetbrains [writing-mode:vertical-rl] tracking-widest rotate-180 mt-2">
+                profile
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* ══ RESIZE HANDLE ══ */}
+        {sidebarOpen && !isMobile && (
+          <div
+            onMouseDown={onDividerMouseDown}
+            className="w-1 shrink-0 bg-[#0d1a2e] hover:bg-payne-gray/40 active:bg-payne-gray/70 transition-colors cursor-col-resize"
+          />
+        )}
+
+        {/* ══ RIGHT PANEL ══ */}
+        <div
+          className={cn(
+            'flex-1 flex flex-col overflow-hidden bg-[#060e20] min-w-0',
+            mobileTab === 'preview' ? 'flex' : 'hidden md:flex'
+          )}
+        >
+          {/* toolbar */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#0d1a2e] shrink-0">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-payne-gray">~/</span>
+              <span className="text-[#c8d8f0]">preview</span>
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse ml-1"
+                title="live"
+              />
+              <span className="text-[11px] font-jetbrains ml-1 text-[#4a7090]">
+                {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DropdownBtn label="export" icon={<Download size={11} />} align="right">
+                <DropItem onClick={handleExportTex}>
+                  <FileText size={12} className="text-payne-gray" /> download .tex
+                </DropItem>
+                <DropItem onClick={handleExportMd}>
+                  <FileText size={12} className="text-payne-gray" /> download .md
+                </DropItem>
+              </DropdownBtn>
+              <PillBtn
+                variant={editMode ? 'accent' : 'default'}
+                onClick={() => {
+                  const next = !editMode
+                  setEditMode(next)
+                  setIframeEditing(false)
+                  if (next) {
+                    setSidebarOpen(false)
+                    setFormatOpen(true)
+                  } else {
+                    setFormatOpen(false)
+                  }
+                }}
+              >
+                <SquarePen size={11} /> {editMode ? 'editing' : 'edit in preview'}
+              </PillBtn>
+              <PillBtn variant="default" onClick={openPdfPreview}>
+                <Printer size={11} /> PDF preview
+              </PillBtn>
             </div>
           </div>
 
-          {/* format sidebar */}
-          <AnimatePresence>
-            {formatOpen && (
-              <FormatSidebar
-                format={format}
-                onFormatChange={(patch) => setFormat((f) => ({ ...f, ...patch }))}
-                onReset={() => setFormat(DEFAULT_FORMAT)}
-                onClose={() => {
-                  setFormatOpen(false)
-                  setEditMode(false)
-                }}
-              />
-            )}
-          </AnimatePresence>
+          <div className="flex flex-1 overflow-hidden">
+            {/* preview scroll */}
+            <div className="flex-1 overflow-y-auto p-6 min-w-0 bg-[#030b18]">
+              <div className="flex flex-col items-center gap-6 max-w-[820px] mx-auto pb-6">
+                {Array.from({ length: pageCount }, (_, i) => (
+                  <div
+                    key={i}
+                    className="w-full shadow-2xl rounded shrink-0 bg-white"
+                    style={{ height: 1056 }}
+                  >
+                    {i > 0 && <div style={{ height: marginPx }} />}
+                    <div
+                      style={{
+                        height: i === 0 ? marginPx + contentPerPage : contentPerPage,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <iframe
+                        ref={i === 0 ? iframeRef : undefined}
+                        srcDoc={resumeHtmlFinal}
+                        title={`Resume Page ${i + 1}`}
+                        sandbox="allow-scripts allow-same-origin"
+                        className={cn(
+                          'w-full border-0 overflow-hidden bg-white block',
+                          i === 0 && editMode && 'cursor-pointer'
+                        )}
+                        style={{
+                          height: Math.max(contentHeight || contentPerPage, contentPerPage),
+                          transform: `translateY(-${i === 0 ? 0 : marginPx + i * contentPerPage}px)`,
+                          marginBottom: `-${i === 0 ? 0 : marginPx + i * contentPerPage}px`,
+                        }}
+                      />
+                    </div>
+                    <div style={{ height: marginPx }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* format sidebar */}
+            <AnimatePresence>
+              {formatOpen && (
+                <FormatSidebar
+                  format={format}
+                  onFormatChange={(patch) => setFormat((f) => ({ ...f, ...patch }))}
+                  onReset={() => setFormat(DEFAULT_FORMAT)}
+                  onClose={() => {
+                    setFormatOpen(false)
+                    setEditMode(false)
+                  }}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
+      {/* end flex flex-1 overflow-hidden */}
 
       {/* ══ PDF PREVIEW MODAL ══ */}
       {pdfPreviewOpen && (

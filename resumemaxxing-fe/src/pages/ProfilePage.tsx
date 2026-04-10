@@ -165,6 +165,17 @@ export default function ProfilePage() {
       className="relative w-full overflow-hidden bg-[#030b18]"
       style={{ height: 'calc(100vh - 56px)' }}
     >
+      {/* Mobile notice */}
+      <div className="md:hidden absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#030b18] px-8 text-center">
+        <span className="font-jetbrains text-2xl">⌨️</span>
+        <p className="font-jetbrains text-sm text-[#c8d8f0]">
+          the canvas profile editor works best on desktop
+        </p>
+        <p className="font-jetbrains text-[11px] text-[#4a7090]">
+          open on a larger screen to drag, zoom, and edit your career sections
+        </p>
+      </div>
+
       {/* dot grid */}
       <div className="absolute inset-0 pointer-events-none" style={dotStyle} />
 

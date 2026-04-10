@@ -2,7 +2,7 @@ const PUBLISH_DATE = 'March 2026'
 
 const ManifestoPage = () => {
   return (
-    <main className="min-h-screen px-6 py-20">
+    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-20">
       <article className="max-w-2xl mx-auto">
         {/* Header */}
         <header className="mb-16">

@@ -9,7 +9,7 @@ const fade = (delay = 0) => ({
 
 const HeroSection = () => {
   return (
-    <div className="grid grid-cols-2 font-jetbrains min-h-screen">
+    <div className="font-jetbrains min-h-[calc(100vh-56px)] flex flex-col justify-center py-12 md:py-20">
       <div className="flex flex-col gap-8 max-w-xl">
         {/* Command + response */}
         <motion.div {...fade(0)} className="flex flex-col gap-2">
@@ -26,7 +26,7 @@ const HeroSection = () => {
 
         {/* Title */}
         <motion.div {...fade(0.25)} className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-bold text-[#e8f0fc] tracking-widest uppercase">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#e8f0fc] tracking-widest uppercase">
             Resume-maxxing,
           </h1>
           <p className="text-xs text-[#4a7090] tracking-wider">because i need a mf job</p>
@@ -77,7 +77,7 @@ const HeroSection = () => {
       </div>
 
       {/* Right side */}
-      <motion.div
+      {/* <motion.div
         className="
           flex 
           justify-center 
@@ -89,7 +89,7 @@ const HeroSection = () => {
         "
       >
         <div className="bg-white min-w-7"></div>
-      </motion.div>
+      </motion.div> */}
     </div>
   )
 }

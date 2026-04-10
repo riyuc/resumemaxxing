@@ -69,6 +69,7 @@ export default function AutoCreatePage() {
   const [selectedGuidelines, setSelectedGuidelines] = useState<string[]>(
     GUIDELINES.map((g) => g.id)
   )
+  const [mobileTab, setMobileTab] = useState<'profile' | 'main'>('main')
 
   // ── preview ──
   const format = useMemo(() => {
@@ -142,9 +143,35 @@ export default function AutoCreatePage() {
   const jsonStr = useMemo(() => JSON.stringify(apiProfile, null, 2), [apiProfile])
 
   return (
-    <div className="flex overflow-hidden bg-[#030b18]" style={{ height: 'calc(100vh - 56px)' }}>
+    <div
+      className="flex flex-col md:flex-row overflow-hidden bg-[#030b18]"
+      style={{ height: 'calc(100vh - 56px)' }}
+    >
+      {/* Mobile tab bar */}
+      <div className="md:hidden flex border-b border-[#0d1a2e] shrink-0 bg-[#08132a]">
+        {(['main', 'profile'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setMobileTab(tab)}
+            className={cn(
+              'flex-1 py-2.5 font-jetbrains text-[11px] transition-colors cursor-pointer',
+              mobileTab === tab
+                ? 'text-[#c8d8f0] border-b-2 border-payne-gray'
+                : 'text-[#4a7090] hover:text-[#6a8aaa]'
+            )}
+          >
+            {tab === 'main' ? '~/ generate' : '// profile.json'}
+          </button>
+        ))}
+      </div>
+
       {/* ══ LEFT: profile JSON ══ */}
-      <div className="w-[360px] shrink-0 flex flex-col border-r border-[#0d1a2e]">
+      <div
+        className={cn(
+          'md:w-[360px] md:shrink-0 flex flex-col border-r border-[#0d1a2e]',
+          mobileTab === 'profile' ? 'flex flex-1' : 'hidden md:flex'
+        )}
+      >
         {/* header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#0d1a2e] shrink-0 bg-[#08132a]">
           <span className="font-jetbrains text-[11px] text-payne-gray">// profile.json</span>
@@ -172,7 +199,12 @@ export default function AutoCreatePage() {
       </div>
 
       {/* ══ RIGHT: JD input or resume preview ══ */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div
+        className={cn(
+          'flex-1 flex flex-col overflow-hidden min-w-0',
+          mobileTab === 'profile' ? 'hidden md:flex' : 'flex'
+        )}
+      >
         {!result ? (
           /* ── input phase ── */
           <div className="flex-1 flex flex-col overflow-hidden">
