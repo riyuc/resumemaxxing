@@ -72,7 +72,7 @@ export function CanvasContextMenu({
             }}
             className="flex items-center gap-2.5 w-full px-3 py-1.5 hover:bg-[#0c1a38] transition-colors cursor-pointer text-left"
           >
-            <span style={{ color: SECTION_META[s].color }} className="flex-shrink-0">
+            <span style={{ color: SECTION_META[s].color }} className="shrink-0">
               {SECTION_META[s].icon}
             </span>
             <span className="font-jetbrains text-[11px] text-[#c8d8f0]">
@@ -102,7 +102,7 @@ export function CanvasContextMenu({
           }}
           className="flex items-center gap-2.5 w-full px-3 py-1.5 hover:bg-[#0c1a38] transition-colors cursor-pointer text-left"
         >
-          <span style={{ color: meta.color }} className="flex-shrink-0">
+          <span style={{ color: meta.color }} className="shrink-0">
             {meta.icon}
           </span>
           <span className="font-jetbrains text-[11px] text-[#c8d8f0]">{meta.label}</span>

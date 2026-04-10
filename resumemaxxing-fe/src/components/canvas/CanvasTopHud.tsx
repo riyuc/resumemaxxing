@@ -36,7 +36,7 @@ export function CanvasTopHud({
       {/* branding + hint */}
       <div className="pointer-events-auto flex items-center gap-2">
         <div className="flex flex-col leading-none">
-          <span className="font-jetbrains text-[10px] text-[#456677] tracking-[0.3em] uppercase">
+          <span className="font-jetbrains text-[10px] text-payne-gray tracking-[0.3em] uppercase">
             your
           </span>
           <span className="font-jetbrains text-lg font-bold text-[#e8f0fc] tracking-tight leading-none">

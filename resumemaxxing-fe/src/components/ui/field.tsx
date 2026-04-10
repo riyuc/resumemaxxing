@@ -12,7 +12,7 @@ export const Field = ({
   multiline?: boolean
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-[9px] text-[#456677] tracking-widest uppercase font-jetbrains">
+    <span className="text-[9px] text-payne-gray tracking-widest uppercase font-jetbrains">
       {label}
     </span>
     {multiline ? (

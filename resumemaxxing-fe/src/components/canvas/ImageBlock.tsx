@@ -42,7 +42,7 @@ export function ImageBlock({
         style={{ background: '#0e0614', cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={onHeaderMouseDown}
       >
-        <GripHorizontal size={12} className="text-[#3a1050] flex-shrink-0" />
+        <GripHorizontal size={12} className="text-[#3a1050] shrink-0" />
         <ImageIcon size={12} style={{ color: '#c86ea8' }} />
         <span className="font-jetbrains text-[10px] font-bold tracking-widest flex-1 text-[#c86ea8]">
           IMAGE

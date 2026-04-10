@@ -35,13 +35,13 @@ export function EntryRow({
             {date && <span className="ml-2">{date}</span>}
           </p>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation()
               onEdit()
             }}
-            className="text-[#456677] hover:text-[#94a3b8] cursor-pointer"
+            className="text-payne-gray hover:text-[#94a3b8] cursor-pointer"
           >
             <Pencil size={10} />
           </button>
@@ -50,15 +50,15 @@ export function EntryRow({
               e.stopPropagation()
               onDelete()
             }}
-            className="text-[#456677] hover:text-[#ef4444] cursor-pointer"
+            className="text-payne-gray hover:text-[#ef4444] cursor-pointer"
           >
             <Trash2 size={10} />
           </button>
         </div>
         {expanded ? (
-          <ChevronUp size={10} className="text-[#2a4060] flex-shrink-0" />
+          <ChevronUp size={10} className="text-[#2a4060] shrink-0" />
         ) : (
-          <ChevronDown size={10} className="text-[#2a4060] flex-shrink-0" />
+          <ChevronDown size={10} className="text-[#2a4060] shrink-0" />
         )}
       </div>
       <AnimatePresence>

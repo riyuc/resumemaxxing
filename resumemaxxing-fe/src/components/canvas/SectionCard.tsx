@@ -89,8 +89,8 @@ export function SectionCard({
           }}
           onMouseDown={onHeaderMouseDown}
         >
-          <GripHorizontal size={12} className="text-[#2a4060] flex-shrink-0" />
-          <span style={{ color: meta.color }} className="flex-shrink-0">
+          <GripHorizontal size={12} className="text-[#2a4060] shrink-0" />
+          <span style={{ color: meta.color }} className="shrink-0">
             {meta.icon}
           </span>
           <span
@@ -103,9 +103,9 @@ export function SectionCard({
             {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
           </span>
           {isExpanded ? (
-            <ChevronUp size={11} className="text-[#456677]" />
+            <ChevronUp size={11} className="text-payne-gray" />
           ) : (
-            <ChevronDown size={11} className="text-[#456677]" />
+            <ChevronDown size={11} className="text-payne-gray" />
           )}
           <button
             className="text-[#2a4060] hover:text-[#ef4444] transition-colors cursor-pointer ml-1"
@@ -158,13 +158,13 @@ export function SectionCard({
                               onClick={() => {
                                 onStartEdit(entry.id)
                               }}
-                              className="text-[#456677] hover:text-[#94a3b8] cursor-pointer"
+                              className="text-payne-gray hover:text-[#94a3b8] cursor-pointer"
                             >
                               <Pencil size={10} />
                             </button>
                             <button
                               onClick={() => onDeleteEntry(entry.id)}
-                              className="text-[#456677] hover:text-[#ef4444] cursor-pointer"
+                              className="text-payne-gray hover:text-[#ef4444] cursor-pointer"
                             >
                               <Trash2 size={10} />
                             </button>
@@ -236,7 +236,7 @@ export function SectionCard({
                               key={i}
                               className="font-jetbrains text-[10px] text-[#4a7090] flex gap-1.5"
                             >
-                              <span className="text-[#456677] flex-shrink-0">◆</span>
+                              <span className="text-payne-gray shrink-0">◆</span>
                               {b}
                             </li>
                           ))}
@@ -273,7 +273,7 @@ export function SectionCard({
                               key={i}
                               className="font-jetbrains text-[10px] text-[#4a7090] flex gap-1.5"
                             >
-                              <span className="text-[#456677] flex-shrink-0">◆</span>
+                              <span className="text-payne-gray shrink-0">◆</span>
                               {b}
                             </li>
                           ))}
@@ -371,7 +371,7 @@ export function SectionCard({
                 {/* add button */}
                 {!isAdding && (
                   <button
-                    className="w-full flex items-center gap-1.5 px-3 py-2 font-jetbrains text-[10px] text-[#2a4060] hover:text-[#456677] hover:bg-[#080f1e] transition-colors cursor-pointer border-t border-[#0d1a2e]"
+                    className="w-full flex items-center gap-1.5 px-3 py-2 font-jetbrains text-[10px] text-[#2a4060] hover:text-payne-gray hover:bg-[#080f1e] transition-colors cursor-pointer border-t border-[#0d1a2e]"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={onStartAdd}
                   >

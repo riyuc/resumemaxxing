@@ -35,7 +35,7 @@ export function LinkBlock({
         style={{ background: '#060f1a', cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={onHeaderMouseDown}
       >
-        <GripHorizontal size={12} className="text-[#1a3060] flex-shrink-0" />
+        <GripHorizontal size={12} className="text-[#1a3060] shrink-0" />
         <Link2 size={12} style={{ color: '#6ea8e8' }} />
         <span className="font-jetbrains text-[10px] font-bold tracking-widest flex-1 text-[#6ea8e8]">
           LINK
@@ -110,7 +110,7 @@ export function LinkBlock({
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 font-jetbrains text-[10px] text-[#456ea8] hover:text-[#6ea8e8] transition-colors mt-0.5 truncate"
               >
-                <ExternalLink size={9} className="flex-shrink-0" />
+                <ExternalLink size={9} className="shrink-0" />
                 {block.url}
               </a>
             )}

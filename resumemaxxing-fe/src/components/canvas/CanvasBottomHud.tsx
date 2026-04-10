@@ -30,7 +30,7 @@ export function CanvasBottomHud({
       <div className="flex items-center gap-1.5 bg-[#08132a]/90 border border-[#1a3050] rounded-full px-3 py-1.5 backdrop-blur-sm">
         <button
           onClick={() => setZoom((z) => Math.max(0.25, z * 0.85))}
-          className="text-[#456677] hover:text-[#94a3b8] transition-colors cursor-pointer"
+          className="text-payne-gray hover:text-[#94a3b8] transition-colors cursor-pointer"
         >
           <span className="font-jetbrains text-lg leading-none">−</span>
         </button>
@@ -39,7 +39,7 @@ export function CanvasBottomHud({
         </span>
         <button
           onClick={() => setZoom((z) => Math.min(2.5, z * 1.15))}
-          className="text-[#456677] hover:text-[#94a3b8] transition-colors cursor-pointer"
+          className="text-payne-gray hover:text-[#94a3b8] transition-colors cursor-pointer"
         >
           <span className="font-jetbrains text-lg leading-none">+</span>
         </button>
@@ -49,7 +49,7 @@ export function CanvasBottomHud({
             setPan({ x: 80, y: 80 })
             setZoom(1)
           }}
-          className="text-[#456677] hover:text-[#94a3b8] transition-colors cursor-pointer"
+          className="text-payne-gray hover:text-[#94a3b8] transition-colors cursor-pointer"
         >
           <RotateCcw size={11} />
         </button>

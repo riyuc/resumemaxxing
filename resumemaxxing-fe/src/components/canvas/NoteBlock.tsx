@@ -30,7 +30,7 @@ export function NoteBlock({
         style={{ background: '#1a1605', cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={onHeaderMouseDown}
       >
-        <GripHorizontal size={12} className="text-[#5a4a10] flex-shrink-0" />
+        <GripHorizontal size={12} className="text-[#5a4a10] shrink-0" />
         <StickyNote size={12} style={{ color: '#e8c86e' }} />
         <span className="font-jetbrains text-[10px] font-bold tracking-widest flex-1 text-[#e8c86e]">
           NOTE
