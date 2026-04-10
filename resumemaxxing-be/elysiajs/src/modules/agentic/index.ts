@@ -6,6 +6,7 @@ import {
   TAILOR_RESUME_SYSTEM_PROMPT,
 } from '../../utils/prompts/prompts'
 import { callClaude } from '../../utils/claude/claude'
+import { resolveGuidelines } from '../../utils/prompts/guidelines/index'
 import cors from '@elysiajs/cors'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -30,13 +31,16 @@ const agentic = new Elysia()
 
   // Full career profile + job description → curated, targeted resume
   .post('/generate', async ({ body }) => {
+    const guidelineRules = resolveGuidelines(body.guidelineIds ?? [])
+    const systemPrompt = PROFILE_TO_RESUME_SYSTEM_PROMPT + guidelineRules
     const userContent = `<profile>${JSON.stringify(body.profile)}</profile>\n\n<job_description>${body.jobDescription}</job_description>`
-    const json = await callClaude(PROFILE_TO_RESUME_SYSTEM_PROMPT, userContent, anthropic)
+    const json = await callClaude(systemPrompt, userContent, anthropic)
     return JSON.parse(json)
   }, {
     body: t.Object({
       profile: t.Any(),
       jobDescription: t.String(),
+      guidelineIds: t.Optional(t.Array(t.String())),
     }),
   })
 

@@ -23,19 +23,19 @@ export function EntryRow({
   return (
     <div className="border-b border-[#0d1a2e] last:border-b-0">
       <div
-        className="flex items-center gap-2 px-3 py-2 group hover:bg-[#080f1e] cursor-pointer"
+        className="flex items-start gap-2 px-3 py-2.5 group hover:bg-[#080f1e] cursor-pointer"
         onClick={onToggle}
       >
-        <div className="flex-1 min-w-0">
-          <p className="font-jetbrains text-[11px] text-[#94a3b8] font-semibold truncate">
+        <div className="flex-1 min-w-0 py-0.5">
+          <p className="font-jetbrains text-[11px] text-[#94a3b8] font-semibold leading-snug">
             {title || '—'}
           </p>
-          <p className="font-jetbrains text-[10px] text-[#4a7090] truncate">
+          <p className="font-jetbrains text-[10px] text-[#4a7090] leading-snug mt-0.5">
             {sub}
-            {date && <span className="ml-2">{date}</span>}
+            {date && <span className="block text-[#3a6080] mt-0.5">{date}</span>}
           </p>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
           <button
             onClick={(e) => {
               e.stopPropagation()
